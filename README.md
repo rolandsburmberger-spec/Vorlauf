@@ -5,12 +5,20 @@ Erstkontakt bis zur Schlussrechnung. Kein CRM, kein ERP — eine Prozessstrecke
 mit Fachlogik: Heizlast-Überschlag, KfW-458-Förderrechner mit versionierten
 Regelwerken, XRechnung-Export.
 
-**Status: M1 abgeschlossen + Zustandsautomat (M2-Domain).**
-Der Förder-Rechenkern ist implementiert und vollständig grün: 15 Testfälle
-(Sollwerte verifiziert gegen das KfW-Merkblatt 458, Stand 07/2026,
-Bestellnr. 600 000 5131), dazu 6 Tests für den Zustandsautomaten mit
-Guard-Mechanik. Offen aus M2: Projekt-CRUD (Web), konkrete Guards mit ihren
-Entitäten (Aufnahme, Angebot, Abnahme).
+**Status: M1–M4 Kern fertig, M5/M6 Basis, klickbare Web-App.**
+Förder-Rechenkern grün (15 Testfälle, Sollwerte verifiziert gegen das
+KfW-Merkblatt 458, Stand 07/2026, Bestellnr. 600 000 5131), Zustandsautomat
+mit konkreten Guards (17 weitere Tests), Heizlast-Überschlag, Razor-Pages-App
+mit Projektliste/-detail, Statuswechsel (Guards blockieren mit Grund),
+mobiler Aufnahme, Förder-Check inkl. „Was kostet Warten?"-Stichtagsvergleich,
+Angebot mit „Preis nach Förderung", Abnahme mit Unterschrift-Canvas,
+Schlussrechnung und Pipeline-Dashboard.
+
+**Bewusster Zwischenstand:** Ablage in-memory (Port `IProjektStore`),
+Auth als Cookie-Demo-Login (`demo/demo`, `admin/admin`). Beides wird beim
+EF-/Identity-Umstieg ersetzt (siehe `WPFlow.Web.csproj`); die EF-Vorbereitung
+liegt in `WPFlow.Infrastructure`. Offen: PDF (M5), XRechnung + KoSIT (M7),
+Demo-Hosting (M8).
 
 ## Struktur
 
@@ -26,7 +34,8 @@ Entitäten (Aufnahme, Angebot, Abnahme).
 ```bash
 dotnet restore
 dotnet build
-dotnet test   # 21 Tests, alle grün (Rechenkern + Zustandsautomat)
+dotnet test   # 32 Tests, alle grün (Rechenkern, Zustandsautomat, Guards, Heizlast, Angebot)
+dotnet run --project src/WPFlow.Web   # Login: demo/demo — Demo-Daten werden geseedet
 ```
 
 .NET-10-SDK erforderlich (LTS). Dev-Datenbank: SQLite (automatisch);

@@ -1,0 +1,87 @@
+@page "{id:guid}"
+@model WPFlow.Web.Pages.Projekte.AngebotModel
+@{
+    ViewData["Title"] = "Angebot";
+    var a = Model.Angebot;
+}
+
+<h1 class="h4">Angebot — @Model.Projekt.Bezeichnung</h1>
+
+@if (a is null)
+{
+  <form method="post" asp-page-handler="Anlegen">
+    <button class="btn btn-primary" type="submit">Angebot anlegen</button>
+  </form>
+}
+else
+{
+  <p class="text-muted">@a.Nummer vom @a.Datum.ToString("dd.MM.yyyy") @(a.Angenommen ? $"— angenommen am {a.Vertragsdatum:dd.MM.yyyy}" : "")</p>
+
+  <table class="table table-sm col-lg-10">
+    <thead><tr><th>Pos</th><th>Bezeichnung</th><th class="text-end">Menge</th><th>Einheit</th><th class="text-end">EP netto</th><th class="text-end">Gesamt netto</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var pos in a.Positionen.OrderBy(x => x.Position))
+    {
+      <tr>
+        <td>@pos.Position</td>
+        <td>@pos.Bezeichnung</td>
+        <td class="text-end">@pos.Menge</td>
+        <td>@pos.Einheit</td>
+        <td class="text-end">@pos.EinzelpreisNetto.ToString("N2")</td>
+        <td class="text-end">@pos.GesamtNetto.ToString("N2")</td>
+        <td>
+          @if (!a.Angenommen)
+          {
+            <form method="post" asp-page-handler="PositionLoeschen" class="d-inline">
+              <input type="hidden" name="positionId" value="@pos.Id" />
+              <button class="btn btn-sm btn-outline-danger" type="submit">×</button>
+            </form>
+          }
+        </td>
+      </tr>
+    }
+    </tbody>
+    <tfoot>
+      <tr><td colspan="5" class="text-end">Netto</td><td class="text-end">@a.SummeNetto.ToString("N2") €</td><td></td></tr>
+      <tr><td colspan="5" class="text-end">MwSt</td><td class="text-end">@a.SummeMwSt.ToString("N2") €</td><td></td></tr>
+      <tr class="table-light"><td colspan="5" class="text-end"><strong>Brutto</strong></td><td class="text-end"><strong>@a.SummeBrutto.ToString("N2") €</strong></td><td></td></tr>
+      @if (Model.Zuschuss is { } z)
+      {
+        <tr><td colspan="5" class="text-end">Voraussichtlicher KfW-Zuschuss*</td><td class="text-end">−@z.ToString("N2") €</td><td></td></tr>
+        <tr class="table-success"><td colspan="5" class="text-end"><strong>Preis nach Förderung*</strong></td><td class="text-end"><strong>@a.PreisNachFoerderung(z).ToString("N2") €</strong></td><td></td></tr>
+      }
+    </tfoot>
+  </table>
+  <p class="small text-muted col-lg-10">* Unverbindliche Orientierung auf Basis der gespeicherten Förderberechnung. Maßgeblich sind die KfW-Bedingungen am Tag der Antragstellung.</p>
+
+  @if (!a.Angenommen)
+  {
+    <form method="post" asp-page-handler="PositionZufuegen" class="row col-lg-10 mb-3">
+      <div class="col-md-4"><input class="form-control" name="bezeichnung" placeholder="Bezeichnung" required /></div>
+      <div class="col-md-2"><input class="form-control" name="menge" type="number" step="0.5" value="1" min="0.5" /></div>
+      <div class="col-md-2"><input class="form-control" name="einheit" value="Stk" /></div>
+      <div class="col-md-2"><input class="form-control" name="einzelpreis" type="number" step="10" placeholder="EP netto" required /></div>
+      <div class="col-md-2"><button class="btn btn-outline-primary w-100" type="submit">Hinzufügen</button></div>
+    </form>
+
+    <form method="post" asp-page-handler="Flags" class="mb-3">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="vorbehalt" value="true" checked="@a.FoerdervorbehaltsklauselEnthalten" id="fv" onchange="this.form.submit()" />
+        <label class="form-check-label" for="fv">Fördervorbehaltsklausel im Angebot/Vertrag enthalten (Guard für „Angeboten")</label>
+      </div>
+    </form>
+
+    <form method="post" asp-page-handler="Annehmen" class="row col-lg-6">
+      <div class="col-md-5">
+        <input class="form-control" name="vertragsdatum" type="date" />
+      </div>
+      <div class="col-md-7">
+        <button class="btn btn-success" type="submit">Angebot angenommen (Vertragsdatum)</button>
+      </div>
+    </form>
+  }
+}
+
+<div class="mt-3">
+  <a class="btn btn-outline-secondary" asp-page="/Projekte/Detail" asp-route-id="@Model.Projekt.Id">Zurück</a>
+</div>

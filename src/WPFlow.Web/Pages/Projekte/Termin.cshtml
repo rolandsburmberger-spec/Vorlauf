@@ -1,0 +1,25 @@
+@page "{id:guid}"
+@model WPFlow.Web.Pages.Projekte.TerminModel
+@{
+    ViewData["Title"] = "Montagetermin";
+    var t = Model.Projekt.Montagetermin;
+}
+
+<h1 class="h4">Montagetermin — @Model.Projekt.Bezeichnung</h1>
+
+<form method="post" class="col-md-5">
+  <div class="mb-3">
+    <label class="form-label">Start</label>
+    <input class="form-control" name="start" type="date" value="@t?.Start?.ToString("yyyy-MM-dd")" required />
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Ende (optional)</label>
+    <input class="form-control" name="ende" type="date" value="@t?.Ende?.ToString("yyyy-MM-dd")" />
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Team</label>
+    <input class="form-control" name="team" value="@t?.Team" required placeholder="Team Nord" />
+  </div>
+  <button class="btn btn-primary" type="submit">Speichern</button>
+  <a class="btn btn-outline-secondary" asp-page="/Projekte/Detail" asp-route-id="@Model.Projekt.Id">Zurück</a>
+</form>

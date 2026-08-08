@@ -1,0 +1,122 @@
+@page "{id:guid}"
+@using WPFlow.Domain.Foerderung
+@model WPFlow.Web.Pages.Projekte.FoerdercheckModel
+@{
+    ViewData["Title"] = "Förder-Check";
+}
+
+<h1 class="h4">Förder-Check — @Model.Projekt.Bezeichnung</h1>
+
+@if (Model.Fehler is not null)
+{
+  <div class="alert alert-danger">@Model.Fehler</div>
+}
+
+<form method="post" class="row col-lg-10">
+  <div class="col-md-3 mb-3">
+    <label class="form-label">Stichtag (Antragstellung)</label>
+    <input class="form-control" name="stichtag" type="date" value="@Model.Stichtag.ToString("yyyy-MM-dd")" />
+  </div>
+  <div class="col-md-3 mb-3">
+    <label class="form-label">Investitionskosten (brutto €)</label>
+    <input class="form-control" name="kosten" type="number" step="100" min="300" value="@Model.Kosten" />
+  </div>
+  <div class="col-md-3 mb-3">
+    <label class="form-label">zvE (Ø Bescheide Jahr −2/−3, €)</label>
+    <input class="form-control" name="zvE" type="number" step="500" value="@Model.ZvE" />
+  </div>
+  <div class="col-md-3 mb-3">
+    <label class="form-label">Vergleichs-Stichtag („Was kostet Warten?")</label>
+    <input class="form-control" name="vergleichsStichtag" type="date" value="@Model.VergleichsStichtag?.ToString("yyyy-MM-dd")" />
+  </div>
+  <div class="col-12 mb-2">
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="checkbox" name="kind" value="true" checked="@Model.Kind" id="kind" />
+      <label class="form-check-label" for="kind">Minderjähriges Kind im Haushalt (Hauptwohnsitz, Kindergeldberechtigung)</label>
+    </div>
+  </div>
+  <div class="col-12">
+    <button class="btn btn-primary" type="submit">Zuschuss berechnen</button>
+    <a class="btn btn-outline-secondary" asp-page="/Projekte/Detail" asp-route-id="@Model.Projekt.Id">Zurück</a>
+    <span class="form-text d-block mt-1">Selbstnutzung, Altheizung und Wohneinheiten werden aus Kunde/Gebäude/Aufnahme übernommen.</span>
+  </div>
+</form>
+
+@if (Model.Ergebnis is { } b)
+{
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card border-primary">
+        <div class="card-body">
+          <h2 class="h6">Ergebnis zum @b.Eingabe.Stichtag.ToString("dd.MM.yyyy")</h2>
+          @if (!b.RegelwerkVerbindlich)
+          {
+            <div class="alert alert-warning py-1 small">Angekündigte, noch unverbindliche Förderstufe.</div>
+          }
+          <table class="table table-sm">
+            <tbody>
+            @foreach (var pos in b.Positionen)
+            {
+              <tr>
+                <td>@pos.Art</td>
+                <td class="text-end">@pos.Satz.ToString("P0")</td>
+                <td class="text-end">@pos.Betrag.ToString("N0") €</td>
+              </tr>
+            }
+            <tr class="table-light">
+              <td><strong>Zuschuss (gedeckelt @b.GedeckelterSatz.ToString("P0"))</strong></td>
+              <td class="text-end" colspan="2"><strong class="fs-5">@b.Zuschuss.ToString("N0") €</strong></td>
+            </tr>
+            <tr>
+              <td>Förderfähige Kosten</td>
+              <td class="text-end" colspan="2">@b.FoerderfaehigeKosten.ToString("N0") €</td>
+            </tr>
+            @if (Model.PreisNachFoerderung is { } pnf)
+            {
+              <tr>
+                <td>Preis nach Förderung (akt. Angebot)</td>
+                <td class="text-end" colspan="2"><strong>@pnf.ToString("N0") €</strong></td>
+              </tr>
+            }
+            </tbody>
+          </table>
+          <div class="small text-muted">@Model.Disclaimer</div>
+        </div>
+      </div>
+    </div>
+    @if (Model.Vergleich is { } v)
+    {
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h2 class="h6">Vergleich zum @v.Eingabe.Stichtag.ToString("dd.MM.yyyy")</h2>
+            @if (!v.RegelwerkVerbindlich)
+            {
+              <div class="alert alert-warning py-1 small">Angekündigte, noch unverbindliche Förderstufe.</div>
+            }
+            <p class="mb-1">Zuschuss: <strong>@v.Zuschuss.ToString("N0") €</strong> (@v.GedeckelterSatz.ToString("P0") von @v.FoerderfaehigeKosten.ToString("N0") €)</p>
+            <p class="fs-5 @(Model.Differenz > 0 ? "text-danger" : "text-success")">
+              @(Model.Differenz > 0 ? $"Warten kostet {Model.Differenz:N0} € Zuschuss." : "Kein Nachteil durch Warten.")
+            </p>
+            <div class="small text-muted">@Model.Disclaimer</div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<h2 class="h6 mt-4">Gespeicherte Berechnungen (Snapshots)</h2>
+<table class="table table-sm small col-lg-8">
+  <tbody>
+  @foreach (var s in Enumerable.Reverse(Model.Projekt.Foerderberechnungen))
+  {
+    <tr>
+      <td>@s.ErstelltUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+      <td>Stichtag @s.Eingabe.Stichtag.ToString("dd.MM.yyyy")</td>
+      <td class="text-end">@s.Zuschuss.ToString("N0") €</td>
+      <td>@(s.RegelwerkVerbindlich ? "" : "unverbindlich")</td>
+    </tr>
+  }
+  </tbody>
+</table>

@@ -6,15 +6,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <!-- Identity-UI 9.0.x passend zum EF-9-Stack (siehe Infrastructure.csproj). -->
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.*" />
-  </ItemGroup>
-
+  <!--
+    Bewusst ohne NuGet-Abhängigkeiten (nur Shared Framework): Auth läuft als
+    Cookie-Auth mit Demo-Benutzern, Ablage in-memory (Domain-Port IProjektStore).
+    Umstieg auf EF Core + ASP.NET Identity: ProjectReference auf
+    WPFlow.Infrastructure ergänzen und in Program.cs den Store austauschen.
+  -->
   <ItemGroup>
     <ProjectReference Include="..\WPFlow.Domain\WPFlow.Domain.csproj" />
-    <ProjectReference Include="..\WPFlow.Infrastructure\WPFlow.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

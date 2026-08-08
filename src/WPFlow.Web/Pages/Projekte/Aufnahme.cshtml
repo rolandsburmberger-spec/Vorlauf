@@ -1,0 +1,89 @@
+@page "{id:guid}"
+@using WPFlow.Domain.Foerderung
+@using WPFlow.Domain.Projekte
+@model WPFlow.Web.Pages.Projekte.AufnahmeModel
+@{
+    ViewData["Title"] = "Aufnahme";
+    var a = Model.Aufnahme;
+}
+
+<h1 class="h4">Aufnahme — @Model.Projekt.Bezeichnung</h1>
+<p class="text-muted small">Mobil ausfüllbar. Heizlast ist ein Überschlag und ersetzt keine Berechnung nach DIN EN 12831.</p>
+
+@if (Model.Hinweise.Count > 0)
+{
+  <div class="alert alert-warning">
+    @foreach (var h in Model.Hinweise)
+    {
+      <div>@h</div>
+    }
+  </div>
+}
+
+<form method="post" class="col-lg-6">
+  <h2 class="h6">Bestandsheizung</h2>
+  <div class="row">
+    <div class="col-6 mb-3">
+      <label class="form-label">Typ</label>
+      <select class="form-select" name="altheizungTyp">
+        <option value="">— wählen —</option>
+        @foreach (var t in Enum.GetValues<AltheizungsTyp>())
+        {
+          <option value="@t" selected="@(a?.AltheizungTyp == t)">@t</option>
+        }
+      </select>
+    </div>
+    <div class="col-6 mb-3">
+      <label class="form-label">Baujahr Heizung</label>
+      <input class="form-control" name="altheizungBaujahr" type="number" min="1950" max="2026" value="@a?.AltheizungBaujahr" />
+    </div>
+  </div>
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" name="funktionstuechtig" value="true" checked="@(a?.AltheizungFunktionstuechtig ?? true)" id="ft" />
+    <label class="form-check-label" for="ft">Altheizung funktionstüchtig (Klimabonus-Voraussetzung — vor Antrag dokumentieren)</label>
+  </div>
+
+  <h2 class="h6">Gebäude / Heizflächen</h2>
+  <div class="row">
+    <div class="col-6 mb-3">
+      <label class="form-label">Heizflächen</label>
+      <select class="form-select" name="heizflaechen">
+        <option value="">— wählen —</option>
+        @foreach (var h in Enum.GetValues<Heizflaechen>())
+        {
+          <option value="@h" selected="@(a?.Heizflaechen == h)">@h</option>
+        }
+      </select>
+    </div>
+    <div class="col-6 mb-3">
+      <label class="form-label">Vorlauftemperatur (°C)</label>
+      <input class="form-control" name="vorlauf" type="number" min="25" max="90" value="@a?.VorlauftemperaturC" />
+    </div>
+    <div class="col-6 mb-3">
+      <label class="form-label">Dämmzustand</label>
+      <select class="form-select" name="daemmzustand">
+        <option value="">— wählen —</option>
+        @foreach (var d in Enum.GetValues<Daemmzustand>())
+        {
+          <option value="@d" selected="@(a?.Daemmzustand == d)">@d</option>
+        }
+      </select>
+    </div>
+    <div class="col-6 mb-3">
+      <label class="form-label">Bemerkung</label>
+      <input class="form-control" name="bemerkung" value="@a?.Bemerkung" />
+    </div>
+  </div>
+
+  <button class="btn btn-primary" type="submit">Speichern + Heizlast berechnen</button>
+  <a class="btn btn-outline-secondary" asp-page="/Projekte/Detail" asp-route-id="@Model.Projekt.Id">Zurück</a>
+</form>
+
+@if (a?.BerechneteHeizlastKw is { } kw)
+{
+  <div class="alert alert-info mt-3 col-lg-6">
+    <strong>Heizlast (Überschlag): @kw kW</strong><br />
+    @a.Geraeteempfehlung<br />
+    <span class="small text-muted">Überschlag — ersetzt keine normgerechte Heizlastberechnung.</span>
+  </div>
+}

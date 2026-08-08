@@ -1,16 +1,45 @@
 @page
 @model IndexModel
 @{
-    ViewData["Title"] = "Projekte";
+    ViewData["Title"] = "Dashboard";
 }
 
-<h1>Wärmepumpen-Projekte</h1>
+<h1 class="h3">Pipeline</h1>
 
-<p>
-    Noch keine Projekte vorhanden. Die Prozessstrecke (Anfrage → … → Abgeschlossen)
-    entsteht in Meilenstein M2.
-</p>
-<p class="text-muted">
-    Hinweis: Alle Förderangaben in dieser Anwendung sind eine unverbindliche
-    Orientierung. Maßgeblich sind die KfW-Bedingungen am Tag der Antragstellung.
-</p>
+<div class="row g-2 mb-4">
+  @foreach (var (status, anzahl) in Model.Pipeline)
+  {
+    <div class="col-6 col-md-3 col-lg-2">
+      <a class="text-decoration-none" asp-page="/Projekte/Index" asp-route-status="@status">
+        <div class="card text-center">
+          <div class="card-body py-2">
+            <div class="fs-3">@anzahl</div>
+            <div class="small text-muted">@status</div>
+          </div>
+        </div>
+      </a>
+    </div>
+  }
+</div>
+
+<h2 class="h5">Überfällig (&gt; 14 Tage im Status)</h2>
+@if (Model.Ueberfaellig.Count == 0)
+{
+  <p class="text-muted">Kein Projekt fällt durchs Raster.</p>
+}
+else
+{
+  <table class="table table-sm">
+    <thead><tr><th>Projekt</th><th>Status</th><th>Tage</th></tr></thead>
+    <tbody>
+    @foreach (var (projekt, tage) in Model.Ueberfaellig)
+    {
+      <tr>
+        <td><a asp-page="/Projekte/Detail" asp-route-id="@projekt.Id">@projekt.Bezeichnung</a></td>
+        <td>@projekt.Status</td>
+        <td>@tage</td>
+      </tr>
+    }
+    </tbody>
+  </table>
+}

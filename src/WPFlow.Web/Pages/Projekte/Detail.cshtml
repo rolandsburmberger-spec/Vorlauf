@@ -1,0 +1,81 @@
+@page "{id:guid}"
+@using WPFlow.Domain.Projekte
+@model WPFlow.Web.Pages.Projekte.DetailModel
+@{
+    ViewData["Title"] = Model.Projekt.Bezeichnung;
+    var p = Model.Projekt;
+}
+
+<div class="d-flex justify-content-between align-items-center">
+  <h1 class="h3">@p.Bezeichnung</h1>
+  <span class="badge text-bg-primary fs-6">@p.Status</span>
+</div>
+<p class="text-muted">@p.Kunde?.Name @(p.Kunde?.Selbstnutzer == true ? "· Selbstnutzer" : "") · Gebäude @p.Gebaeude?.Baujahr · @p.Gebaeude?.WohnflaecheM2 m² · @p.Gebaeude?.Wohneinheiten WE</p>
+
+@if (TempData["Fehler"] is string fehler)
+{
+  <div class="alert alert-danger">@fehler</div>
+}
+@if (TempData["Ok"] is string ok)
+{
+  <div class="alert alert-success">@ok</div>
+}
+
+<div class="mb-3">
+  <a class="btn btn-sm btn-outline-secondary" asp-page="/Projekte/Aufnahme" asp-route-id="@p.Id">Aufnahme</a>
+  <a class="btn btn-sm btn-outline-secondary" asp-page="/Projekte/Foerdercheck" asp-route-id="@p.Id">Förder-Check</a>
+  <a class="btn btn-sm btn-outline-secondary" asp-page="/Projekte/Angebot" asp-route-id="@p.Id">Angebot</a>
+  <a class="btn btn-sm btn-outline-secondary" asp-page="/Projekte/Termin" asp-route-id="@p.Id">Termin</a>
+  <a class="btn btn-sm btn-outline-secondary" asp-page="/Projekte/Abnahme" asp-route-id="@p.Id">Abnahme</a>
+  <a class="btn btn-sm btn-outline-secondary" asp-page="/Projekte/Rechnung" asp-route-id="@p.Id">Rechnung</a>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h2 class="h6">Statuswechsel</h2>
+    @if (Model.MoeglicheZiele.Count == 0)
+    {
+      <span class="text-muted">Endzustand — keine Übergänge mehr.</span>
+    }
+    else
+    {
+      <form method="post" asp-page-handler="Wechsel" class="d-inline">
+        @foreach (var ziel in Model.MoeglicheZiele)
+        {
+          <button class="btn btn-outline-primary btn-sm me-1" name="ziel" value="@ziel" type="submit">→ @ziel</button>
+        }
+      </form>
+    }
+    <div class="form-text">Guards blockieren Übergänge mit fehlenden Vorbedingungen und nennen den Grund.</div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <h2 class="h6">Zusammenfassung</h2>
+    <ul class="list-unstyled small">
+      <li>Aufnahme: @(p.Aufnahme is { IstVollstaendig: true } ? $"vollständig, Heizlast {p.Aufnahme.BerechneteHeizlastKw} kW" : p.Aufnahme is null ? "fehlt" : "unvollständig")</li>
+      <li>Förderberechnung: @(p.AktuelleFoerderberechnung is { } b ? $"{b.Zuschuss:N0} € ({b.GedeckelterSatz:P0}), Stichtag {b.Eingabe.Stichtag:dd.MM.yyyy}{(b.RegelwerkVerbindlich ? "" : " — unverbindliche Zukunftsstufe")}" : "fehlt")</li>
+      <li>Angebot: @(p.AktuellesAngebot is { } a ? $"{a.Nummer}, {a.SummeBrutto:N0} € brutto{(a.Angenommen ? ", angenommen" : "")}" : "fehlt")</li>
+      <li>Termin: @(p.Montagetermin is { Start: { } s } ? $"{s:dd.MM.yyyy} ({p.Montagetermin.Team})" : "offen")</li>
+      <li>Abnahme: @(p.Abnahme is { InbetriebnahmeDatum: { } d } ? $"{d:dd.MM.yyyy}, Fachunternehmererklärung {(p.Abnahme.FachunternehmererklaerungAusgestellt ? "ja" : "nein")}" : "offen")</li>
+      <li>Rechnungen: @(p.Rechnungen.Count == 0 ? "keine" : string.Join(", ", p.Rechnungen.Select(r => $"{r.Nummer} ({r.Typ})")))</li>
+    </ul>
+  </div>
+  <div class="col-md-6">
+    <h2 class="h6">Historie</h2>
+    <table class="table table-sm small">
+      <tbody>
+      @foreach (var h in Enumerable.Reverse(p.Historie))
+      {
+        <tr>
+          <td>@h.ZeitpunktUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+          <td>@h.Von → <strong>@h.Nach</strong></td>
+          <td>@h.Benutzer</td>
+          <td class="text-muted">@h.Bemerkung</td>
+        </tr>
+      }
+      </tbody>
+    </table>
+  </div>
+</div>

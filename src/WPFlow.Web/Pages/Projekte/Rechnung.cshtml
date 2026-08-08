@@ -1,0 +1,46 @@
+@page "{id:guid}"
+@using WPFlow.Domain.Projekte
+@model WPFlow.Web.Pages.Projekte.RechnungModel
+@{
+    ViewData["Title"] = "Rechnungen";
+}
+
+<h1 class="h4">Rechnungen — @Model.Projekt.Bezeichnung</h1>
+
+@if (Model.Projekt.Rechnungen.Count == 0)
+{
+  <p class="text-muted">Noch keine Rechnung.</p>
+}
+else
+{
+  <table class="table table-sm col-lg-8">
+    <thead><tr><th>Nummer</th><th>Typ</th><th>Datum</th><th class="text-end">Brutto</th></tr></thead>
+    <tbody>
+    @foreach (var r in Model.Projekt.Rechnungen)
+    {
+      <tr>
+        <td>@r.Nummer</td>
+        <td>@r.Typ</td>
+        <td>@r.Datum.ToString("dd.MM.yyyy")</td>
+        <td class="text-end">@r.SummeBrutto.ToString("N2") €</td>
+      </tr>
+    }
+    </tbody>
+  </table>
+}
+
+@if (Model.Projekt.AktuellesAngebot is { Angenommen: true })
+{
+  <form method="post" asp-page-handler="Schlussrechnung" class="mt-2">
+    <button class="btn btn-primary" type="submit">Schlussrechnung aus Angebot erzeugen</button>
+    <span class="form-text d-block">XRechnung-Export (ZUGFeRD, KoSIT-validiert) folgt in M7.</span>
+  </form>
+}
+else
+{
+  <p class="text-muted small">Schlussrechnung erst nach angenommenem Angebot.</p>
+}
+
+<div class="mt-3">
+  <a class="btn btn-outline-secondary" asp-page="/Projekte/Detail" asp-route-id="@Model.Projekt.Id">Zurück</a>
+</div>

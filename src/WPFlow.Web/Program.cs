@@ -1,22 +1,40 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using WPFlow.Infrastructure;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using WPFlow.Domain.Ablage;
+using WPFlow.Domain.Foerderung;
+using WPFlow.Domain.Projekte;
+using WPFlow.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Dev: SQLite. Produktion/Pilot: MySQL 8 über Pomelo (siehe Infrastructure.csproj).
-var connectionString = builder.Configuration.GetConnectionString("Default")
-    ?? "Data Source=wpflow.dev.db";
-builder.Services.AddDbContext<WpflowDbContext>(o => o.UseSqlite(connectionString));
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<FoerderRechner>();
+builder.Services.AddSingleton(HeizlastRechner.MitStandardtabelle());
+builder.Services.AddSingleton(new Zustandsautomat(TimeProvider.System, StandardGuards.Alle()));
+builder.Services.AddSingleton<IReadOnlyList<Foerderregelwerk>>(_ => SeedRegelwerke.Alle());
+builder.Services.AddSingleton<IProjektStore, InMemoryProjektStore>();
 
 builder.Services
-    .AddDefaultIdentity<IdentityUser>(o => o.SignIn.RequireConfirmedAccount = false)
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<WpflowDbContext>();
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(o =>
+    {
+        o.LoginPath = "/Login";
+        o.AccessDeniedPath = "/Login";
+    });
+builder.Services.AddAuthorizationBuilder()
+    .SetFallbackPolicy(new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build());
 
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
+
+// Demo-Seed: läuft durch die echten Guards — bricht der Seed, ist die Fachlogik kaputt.
+DemoSeed.Fuelle(
+    app.Services.GetRequiredService<IProjektStore>(),
+    app.Services.GetRequiredService<FoerderRechner>(),
+    app.Services.GetRequiredService<Zustandsautomat>(),
+    app.Services.GetRequiredService<IReadOnlyList<Foerderregelwerk>>());
 
 if (!app.Environment.IsDevelopment())
 {
