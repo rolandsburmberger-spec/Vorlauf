@@ -20,7 +20,5 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
-      # M0: Die 10 Rechenkern-Tests sind bewusst rot (Sollliste für M1).
-      # Sobald M1 abgeschlossen ist, ist dieser Schritt der harte Gate.
       - name: Test
         run: dotnet test --no-build --configuration Release --verbosity normal

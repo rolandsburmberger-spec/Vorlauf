@@ -5,10 +5,12 @@ Erstkontakt bis zur Schlussrechnung. Kein CRM, kein ERP — eine Prozessstrecke
 mit Fachlogik: Heizlast-Überschlag, KfW-458-Förderrechner mit versionierten
 Regelwerken, XRechnung-Export.
 
-**Status: M0 (Fundament).** Die 10 Rechenkern-Tests in
-`tests/WPFlow.Tests/Foerderung/FoerderRechnerTests.cs` sind bewusst rot —
-sie sind die verbindliche Sollliste für M1. Sollwerte verifiziert gegen das
-KfW-Merkblatt 458 (Stand 07/2026, Bestellnr. 600 000 5131).
+**Status: M1 abgeschlossen + Zustandsautomat (M2-Domain).**
+Der Förder-Rechenkern ist implementiert und vollständig grün: 15 Testfälle
+(Sollwerte verifiziert gegen das KfW-Merkblatt 458, Stand 07/2026,
+Bestellnr. 600 000 5131), dazu 6 Tests für den Zustandsautomaten mit
+Guard-Mechanik. Offen aus M2: Projekt-CRUD (Web), konkrete Guards mit ihren
+Entitäten (Aufnahme, Angebot, Abnahme).
 
 ## Struktur
 
@@ -24,7 +26,7 @@ KfW-Merkblatt 458 (Stand 07/2026, Bestellnr. 600 000 5131).
 ```bash
 dotnet restore
 dotnet build
-dotnet test   # M0: 10 rote Tests = M1-Sollliste
+dotnet test   # 21 Tests, alle grün (Rechenkern + Zustandsautomat)
 ```
 
 .NET-10-SDK erforderlich (LTS). Dev-Datenbank: SQLite (automatisch);

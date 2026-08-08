@@ -172,4 +172,74 @@ public class FoerderRechnerTests
 
         Assert.Throws<KeinRegelwerkException>(() => Rechner().Berechne(e, Regelwerke));
     }
+
+    [Fact]
+    public void T11_KostenUnterGrenze_KeineDeckelungDerKosten()
+    {
+        var e = Standardfall() with { InvestitionskostenBrutto = 20000m };
+
+        var b = Rechner().Berechne(e, Regelwerke);
+
+        Assert.Equal(20000m, b.FoerderfaehigeKosten);
+        Assert.Equal(9200m, b.Zuschuss);
+    }
+
+    [Fact]
+    public void T12_Degressionsstufe2027_UnverbindlichGekennzeichnet()
+    {
+        // „Was kostet Warten?": Stichtag 01.03.2027 → Klima nur noch 12 %,
+        // Kosten 27.250 € → 42 % = 11.445 € (statt 12.880 €). Regelwerk ist
+        // nur angekündigt → Snapshot muss Unverbindlichkeit tragen.
+        var e = Standardfall() with { Stichtag = new DateOnly(2027, 3, 1) };
+
+        var b = Rechner().Berechne(e, Regelwerke);
+
+        Assert.False(b.RegelwerkVerbindlich);
+        Assert.Equal(27250m, b.FoerderfaehigeKosten);
+        Assert.Equal(0.42m, b.GedeckelterSatz);
+        Assert.Equal(11445m, b.Zuschuss);
+    }
+
+    [Fact]
+    public void T13_ZvEExakt30000_Einkommensbonus40ProzentUndDeckel80()
+    {
+        // Grenze inklusiv: „bis 30.000 €" → 40 %-Stufe und 80 %-Deckel.
+        var e = Standardfall() with
+        {
+            InvestitionskostenBrutto = 28000m,
+            ZuVersteuerndesEinkommen = 30000m,
+        };
+
+        var b = Rechner().Berechne(e, Regelwerke);
+
+        Assert.Equal(0.80m, b.GedeckelterSatz);
+        Assert.Equal(22400m, b.Zuschuss);
+    }
+
+    [Fact]
+    public void T14_Gasetagenheizung11Jahre_KlimabonusOhneAltersgrenze()
+    {
+        // Gasetagenheizung qualifiziert altersunabhängig (Merkblatt 458).
+        var e = Standardfall() with
+        {
+            Altheizung = AltheizungsTyp.Gasetagenheizung,
+            AltheizungInbetriebnahmeJahr = 2015,
+        };
+
+        var b = Rechner().Berechne(e, Regelwerke);
+
+        Assert.Contains(b.Positionen, p => p.Art == BausteinArt.Klimageschwindigkeit);
+        Assert.Equal(12880m, b.Zuschuss);
+    }
+
+    [Fact]
+    public void T15_FossileHeizungVerbleibt_KeinKlimabonus()
+    {
+        var e = Standardfall() with { FossileHeizungVerbleibt = true };
+
+        var b = Rechner().Berechne(e, Regelwerke);
+
+        Assert.DoesNotContain(b.Positionen, p => p.Art == BausteinArt.Klimageschwindigkeit);
+        Assert.Equal(8400m, b.Zuschuss);
+    }
 }

@@ -2,11 +2,14 @@ namespace WPFlow.Domain.Projekte;
 
 /// <summary>
 /// Explizite Übergangstabelle statt verstreuter if-Abfragen (Plan §4).
-/// Guards (M2) prüfen Vorbedingungen wie „Fachunternehmererklärung
-/// ausgestellt" vor Abgenommen → Berechnet.
+/// Jeder erfolgreiche Wechsel schreibt die Historie; Guards prüfen
+/// Vorbedingungen und blockieren mit benanntem Grund.
 /// </summary>
-public static class Zustandsautomat
+public sealed class Zustandsautomat(TimeProvider zeit, IReadOnlyCollection<IUebergangsGuard>? guards = null)
 {
+    private readonly TimeProvider _zeit = zeit;
+    private readonly IReadOnlyCollection<IUebergangsGuard> _guards = guards ?? [];
+
     private static readonly IReadOnlySet<(ProjektStatus Von, ProjektStatus Nach)> Uebergaenge = new HashSet<(ProjektStatus, ProjektStatus)>
     {
         (ProjektStatus.Anfrage, ProjektStatus.Aufgenommen),
@@ -28,9 +31,29 @@ public static class Zustandsautomat
     public static bool IstUebergangDefiniert(ProjektStatus von, ProjektStatus nach) =>
         Uebergaenge.Contains((von, nach));
 
-    /// <summary>M2: Guard-Auswertung je Übergang (Plan §4), dann Historie schreiben.</summary>
-    public static void Wechsle(Projekt projekt, ProjektStatus nach, string benutzer, string? bemerkung = null)
+    public static IReadOnlyList<ProjektStatus> MoeglicheZiele(ProjektStatus von) =>
+        Uebergaenge.Where(u => u.Von == von).Select(u => u.Nach).ToList();
+
+    /// <summary>
+    /// Wechselt den Status oder wirft: <see cref="UngueltigerUebergangException"/>
+    /// (nicht in der Tabelle) bzw. <see cref="UebergangBlockiertException"/>
+    /// (Guard-Vorbedingung verletzt). Kein Wechsel ohne Historieneintrag.
+    /// </summary>
+    public void Wechsle(Projekt projekt, ProjektStatus nach, string benutzer, string? bemerkung = null)
     {
-        throw new NotImplementedException("M2: Guards und Statuswechsel sind noch nicht implementiert.");
+        ArgumentException.ThrowIfNullOrWhiteSpace(benutzer);
+
+        var von = projekt.Status;
+        if (!IstUebergangDefiniert(von, nach))
+            throw new UngueltigerUebergangException(von, nach);
+
+        foreach (var guard in _guards)
+        {
+            var ergebnis = guard.Pruefe(projekt, nach);
+            if (!ergebnis.Erlaubt)
+                throw new UebergangBlockiertException(von, nach, ergebnis.Grund ?? "Vorbedingung nicht erfüllt.");
+        }
+
+        projekt.SetzeStatus(nach, benutzer, bemerkung, _zeit.GetUtcNow().UtcDateTime);
     }
 }

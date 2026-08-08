@@ -88,7 +88,7 @@ public static class SeedRegelwerke
         Deckel =
         [
             new() { MaxSatz = 0.70m, ZvEGrenze = null },
-            new() { MaxSatz = 0.80m, ZvEGrenze = 30000m, NurSelbstnutzung = true },
+            new() { MaxSatz = 0.80m, ZvEGrenze = 30000m, NurSelbstnutzung = true, FamilienzuschlagZvE = 10000m },
         ],
     };
 
@@ -155,7 +155,7 @@ public static class SeedRegelwerke
                 Deckel =
                 [
                     new() { MaxSatz = 0.70m, ZvEGrenze = null },
-                    new() { MaxSatz = 0.80m, ZvEGrenze = 30000m, NurSelbstnutzung = true },
+                    new() { MaxSatz = 0.80m, ZvEGrenze = 30000m, NurSelbstnutzung = true, FamilienzuschlagZvE = 10000m },
                 ],
             });
 

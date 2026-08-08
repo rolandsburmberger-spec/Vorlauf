@@ -13,4 +13,10 @@ public sealed class Foerderdeckel
     /// <summary>null = Regel-Deckel ohne Einkommensbedingung.</summary>
     public decimal? ZvEGrenze { get; init; }
     public bool NurSelbstnutzung { get; init; }
+
+    /// <summary>
+    /// Erhöhung der zvE-Grenze bei Familienzuschlag (Merkblatt 458: +10.000 €).
+    /// null = kein Familienzuschlag auf diesen Deckel anwendbar.
+    /// </summary>
+    public decimal? FamilienzuschlagZvE { get; init; }
 }
