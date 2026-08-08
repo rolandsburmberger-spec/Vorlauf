@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/WPFlow.Domain/WPFlow.Domain.csproj" />
+    <Project Path="src/WPFlow.Infrastructure/WPFlow.Infrastructure.csproj" />
+    <Project Path="src/WPFlow.Web/WPFlow.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WPFlow.Tests/WPFlow.Tests.csproj" />
+  </Folder>
+</Solution>

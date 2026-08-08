@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <!-- Identity-UI 9.0.x passend zum EF-9-Stack (siehe Infrastructure.csproj). -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WPFlow.Domain\WPFlow.Domain.csproj" />
+    <ProjectReference Include="..\WPFlow.Infrastructure\WPFlow.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
