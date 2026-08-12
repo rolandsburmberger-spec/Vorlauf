@@ -6,9 +6,12 @@
     <meta name="description" content="Vorlauf — Prozesssoftware für Wärmepumpen-Projekte im SHK-Betrieb: Prozessstrecke, KfW-458-Förderrechner, Heizlast-Überschlag." />
     <title>@ViewData["Title"] — Vorlauf</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 18'%3E%3Cpath d='M2 5h14' stroke='%23cf4420' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M16 1l8 4-8 4z' fill='%23cf4420'/%3E%3Cpath d='M10 13h14' stroke='%2333567e' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M10 9l-8 4 8 4z' fill='%2333567e'/%3E%3C/svg%3E" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..800&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    @* Schriften kommen vom eigenen Server — kein Google-CDN, damit keine
+       Besucher-IP an Dritte geht (siehe Datenschutzerklärung).
+       Kein preload: Die fingerprinted URL des Tag-Helpers und der relative
+       Pfad in fonts.css sind für den Browser zwei Ressourcen — das lud die
+       Datei doppelt. *@
+    <link rel="stylesheet" href="~/css/fonts.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>

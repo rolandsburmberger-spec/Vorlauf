@@ -94,8 +94,10 @@ Kern fertig und klickbar: Rechenkern, Zustandsautomat, Prozessmasken, Dashboard,
 
 Drei Dinge sind absichtlich noch provisorisch, weil sie den fachlichen Kern nicht berühren: die **Ablage liegt in-memory** hinter dem Port `IProjektStore`, die **Authentifizierung ist ein Cookie-Demo-Login**, die **Betriebs-Stammdaten** (Pflichtangaben nach § 14 UStG) stehen als Seed im Code. Der EF-/Identity-Umstieg ist vorbereitet (`Vorlauf.Infrastructure`) und besteht aus einer ProjectReference plus dem Austausch der Store-Registrierung in `Program.cs`.
 
-Offen: die öffentliche Demo-URL (Deployment ist vorbereitet, siehe oben) sowie
-lokal ausgelieferte Schriften statt Google Fonts.
+Offen: die öffentliche Demo-URL (Deployment ist vorbereitet, siehe oben).
+
+Schriften, Stylesheets und Skripte liefert die Anwendung ausschließlich selbst
+aus — kein CDN, damit beim Aufruf keine Besucher-IP an Dritte geht.
 
 **EF Core ist bewusst auf 9.0.x gepinnt**, weil Pomelo (MySQL-Provider) EF Core 10 noch nicht unterstützt (Stand 08/2026). Der 9er-Stack läuft unverändert unter `net10.0`; Bump, sobald Pomelo nachzieht. `SQLitePCLRaw` ist auf 2.1.12 gepinnt (Sicherheitslücke GHSA-2m69-gcr7-jv3q in der transitiven 2.1.10).
 
