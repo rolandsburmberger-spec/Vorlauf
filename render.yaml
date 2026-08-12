@@ -1,0 +1,26 @@
+# Render-Blueprint für die öffentliche Demo (Free-Tier).
+#
+# Einrichtung: auf render.com unter "New" → "Blueprint" das Repository
+# auswählen; Render liest diese Datei und legt den Dienst an.
+#
+# Free-Tier-Verhalten, das man kennen sollte:
+#   - Der Dienst fährt nach 15 Minuten ohne Anfrage herunter; der nächste
+#     Aufruf startet ihn wieder (rund eine Minute Wartezeit).
+#   - 512 MB RAM, 750 Instanzstunden pro Monat und Workspace.
+#   - Das Dateisystem ist flüchtig — für Vorlauf unproblematisch, weil die
+#     Ablage in-memory läuft und der Seed bei jedem Start neu greift.
+
+services:
+  - type: web
+    name: vorlauf
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    # Die Startseite ist öffentlich erreichbar und eignet sich daher als
+    # Health Check (alle übrigen Seiten verlangen eine Anmeldung).
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production

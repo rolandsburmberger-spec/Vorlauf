@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
 using Vorlauf.Domain.Ablage;
 using Vorlauf.Domain.Foerderung;
 using Vorlauf.Domain.Projekte;
@@ -7,6 +8,24 @@ using Vorlauf.Infrastructure.Dokumente;
 using Vorlauf.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Hosting-Plattformen (Render u. a.) geben den Port über die Umgebungs-
+// variable PORT vor. Lokal bleibt es bei den launchSettings.
+if (Environment.GetEnvironmentVariable("PORT") is { Length: > 0 } port)
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
+// Hinter dem Reverse Proxy der Hosting-Plattform: Ohne die weitergereichten
+// Header sieht die App nur HTTP — HTTPS-Redirect und Cookie-Sicherheit
+// verhielten sich dann falsch.
+builder.Services.Configure<ForwardedHeadersOptions>(o =>
+{
+    o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Der Proxy hat keine feste, vorab bekannte IP. Das Leeren der Listen
+    // ist hier vertretbar, weil die Instanz ausschließlich über diesen
+    // Proxy erreichbar ist und nicht direkt aus dem Internet.
+    o.KnownNetworks.Clear();
+    o.KnownProxies.Clear();
+});
 
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<FoerderRechner>();
@@ -60,6 +79,10 @@ DemoSeed.Fuelle(
     app.Services.GetRequiredService<FoerderRechner>(),
     app.Services.GetRequiredService<Zustandsautomat>(),
     app.Services.GetRequiredService<IReadOnlyList<Foerderregelwerk>>());
+
+// Muss vor allem anderen laufen, damit nachgelagerte Middleware das
+// ursprüngliche Schema (https) sieht.
+app.UseForwardedHeaders();
 
 if (!app.Environment.IsDevelopment())
 {

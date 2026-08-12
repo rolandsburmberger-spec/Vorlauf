@@ -1,0 +1,17 @@
+# Build-Artefakte und alles, was im Image nichts zu suchen hat.
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+
+.git/
+.github/
+
+# Für das Web-Projekt nicht nötig — hält den Build-Kontext klein.
+tests/
+tools/
+
+README.md
+*.slnx

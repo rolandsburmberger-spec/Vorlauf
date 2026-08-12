@@ -61,13 +61,41 @@ dotnet run --project src/Vorlauf.Web     # http://localhost:5188 — Login: demo
 Voraussetzung: .NET-10-SDK. Demo-Daten werden beim Start geseedet.
 CI (Restore/Build/Test sowie KoSIT-Validierung der XRechnung) läuft bei jedem Push über GitHub Actions.
 
+## Deployment
+
+Das Repository enthält ein `Dockerfile` und einen Render-Blueprint (`render.yaml`)
+für den kostenlosen Demo-Betrieb. Auf render.com genügt „New" → „Blueprint" mit
+diesem Repository; alles Weitere steht in der `render.yaml`.
+
+Zwei Eigenheiten, die den Betrieb prägen:
+
+- **Kein Datenbankdienst nötig.** Die Ablage läuft in-memory hinter dem Port
+  `IProjektStore`. Das flüchtige Dateisystem ist damit kein Nachteil, sondern
+  liefert den gewünschten Demo-Reset gratis: Jeder Neustart stellt den
+  Seed-Stand wieder her.
+- **Der Free-Tier fährt nach 15 Minuten ohne Anfrage herunter.** Der nächste
+  Aufruf startet die Instanz wieder — das dauert rund eine Minute. Die
+  Startseite weist darauf hin.
+
+`libfontconfig1` wird im Laufzeit-Image nachinstalliert: QuestPDF rendert über
+SkiaSharp und scheitert ohne dieses Paket zur Laufzeit. Die App liest den Port
+aus der Umgebungsvariablen `PORT` und wertet `X-Forwarded-Proto` aus, damit
+HTTPS-Redirect und Cookies hinter dem Reverse Proxy korrekt arbeiten.
+
+Lokal mit Docker:
+
+```bash
+docker build -t vorlauf . && docker run --rm -p 8080:10000 vorlauf
+```
+
 ## Stand und bewusste Grenzen
 
 Kern fertig und klickbar: Rechenkern, Zustandsautomat, Prozessmasken, Dashboard, Rechnungswesen mit PDF- und XRechnung-Export.
 
 Drei Dinge sind absichtlich noch provisorisch, weil sie den fachlichen Kern nicht berühren: die **Ablage liegt in-memory** hinter dem Port `IProjektStore`, die **Authentifizierung ist ein Cookie-Demo-Login**, die **Betriebs-Stammdaten** (Pflichtangaben nach § 14 UStG) stehen als Seed im Code. Der EF-/Identity-Umstieg ist vorbereitet (`Vorlauf.Infrastructure`) und besteht aus einer ProjectReference plus dem Austausch der Store-Registrierung in `Program.cs`.
 
-Offen: öffentliches Demo-Hosting.
+Offen: die öffentliche Demo-URL (Deployment ist vorbereitet, siehe oben) sowie
+lokal ausgelieferte Schriften statt Google Fonts.
 
 **EF Core ist bewusst auf 9.0.x gepinnt**, weil Pomelo (MySQL-Provider) EF Core 10 noch nicht unterstützt (Stand 08/2026). Der 9er-Stack läuft unverändert unter `net10.0`; Bump, sobald Pomelo nachzieht. `SQLitePCLRaw` ist auf 2.1.12 gepinnt (Sicherheitslücke GHSA-2m69-gcr7-jv3q in der transitiven 2.1.10).
 
