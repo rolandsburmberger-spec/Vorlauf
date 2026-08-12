@@ -17,6 +17,7 @@ var betrieb = new Betrieb
     Telefon = "+49 661 1234567",
     Email = "info@shk-musterhaus.example",
     Steuernummer = "018 838 08150",
+    UStIdNr = "DE136589744",
     Iban = "DE89 3704 0044 0532 0130 00",
     Bic = "COBADEFFXXX",
     Bank = "Commerzbank Fulda",

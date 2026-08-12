@@ -23,6 +23,7 @@ public class DokumentExportTests
         Telefon = "+49 661 1234567",
         Email = "info@shk-musterhaus.example",
         Steuernummer = "018 838 08150",
+        UStIdNr = "DE136589744",
         Iban = "DE89 3704 0044 0532 0130 00",
         Bic = "COBADEFFXXX",
         Bank = "Commerzbank Fulda",
@@ -104,6 +105,10 @@ public class DokumentExportTests
         // Ihr Fehlen hat die KoSIT-Validierung in der CI zu Fall gebracht.
         Assert.Contains("info@shk-musterhaus.example", xml);
         Assert.Matches(@"BuyerTradeParty[\s\S]*?URIUniversalCommunication[\s\S]*?familie\.muster@example\.com", xml);
+
+        // BR-CO-26: ohne Verkäufer-Kennung (hier BT-31, Schema VA) lehnt der
+        // KoSIT-Validator ab — die Steuernummer (BT-32/FC) allein reicht nicht.
+        Assert.Matches(@"SpecifiedTaxRegistration[\s\S]*?schemeID=""VA""[^>]*>DE136589744", xml);
     }
 
     [Fact]

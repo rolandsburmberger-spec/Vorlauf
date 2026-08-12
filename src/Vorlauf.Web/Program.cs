@@ -27,6 +27,10 @@ builder.Services.AddSingleton(new Betrieb
     Telefon = "+49 661 1234567",
     Email = "info@shk-musterhaus.example",
     Steuernummer = "018 838 08150",
+    // Fiktiv, aber prüfziffernkorrekt. In der XRechnung Pflicht: EN 16931
+    // BR-CO-26 verlangt eine Verkäufer-Kennung (BT-29/30/31); die
+    // Steuernummer allein (BT-32) genügt der Regel nicht.
+    UStIdNr = "DE136589744",
     Iban = "DE89 3704 0044 0532 0130 00",
     Bic = "COBADEFFXXX",
     Bank = "Commerzbank Fulda",
