@@ -1,0 +1,145 @@
+@page "{id:guid}"
+@using Vorlauf.Domain.Foerderung
+@model Vorlauf.Web.Pages.Projekte.FoerdercheckModel
+@{
+    ViewData["Title"] = "Förder-Check";
+}
+@functions {
+    private static string ArtLabel(BausteinArt art) => art switch
+    {
+        BausteinArt.Grundfoerderung => "Grundförderung",
+        BausteinArt.Klimageschwindigkeit => "Klimageschwindigkeits-Bonus",
+        BausteinArt.Effizienz => "Effizienzbonus",
+        BausteinArt.Einkommen => "Einkommensbonus",
+        BausteinArt.Emissionsminderung => "Emissionsminderungszuschlag",
+        _ => art.ToString(),
+    };
+}
+
+<div class="vl-pagehead">
+  <div>
+    <div class="vl-crumb"><a asp-page="/Projekte/Index">Projekte</a> / <a asp-page="/Projekte/Detail" asp-route-id="@Model.Projekt.Id">@Model.Projekt.Bezeichnung</a> /</div>
+    <h1>Förder-Check</h1>
+    <p class="text-muted small mb-0">KfW 458 — Zuschuss zum Stichtag berechnen, Snapshot speichern, Warten beziffern.</p>
+  </div>
+</div>
+
+@if (Model.Fehler is not null)
+{
+  <div class="alert alert-danger">@Model.Fehler</div>
+}
+
+<div class="card mb-4" data-tour="fc-form"><div class="card-body">
+  <form method="post" class="row g-3">
+    <div class="col-md-3">
+      <label class="form-label">Stichtag (Antragstellung)</label>
+      <input class="form-control" name="stichtag" type="date" value="@Model.Stichtag.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Investitionskosten (brutto €)</label>
+      <input class="form-control num" name="kosten" type="number" step="100" min="300" value="@Model.Kosten" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">zvE (Ø Bescheide Jahr −2/−3, €)</label>
+      <input class="form-control num" name="zvE" type="number" step="500" value="@Model.ZvE" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Vergleichs-Stichtag („Was kostet Warten?")</label>
+      <input class="form-control" name="vergleichsStichtag" type="date" value="@Model.VergleichsStichtag?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-12">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="kind" value="true" checked="@Model.Kind" id="kind" />
+        <label class="form-check-label" for="kind">Minderjähriges Kind im Haushalt (Hauptwohnsitz, Kindergeldberechtigung)</label>
+      </div>
+    </div>
+    <div class="col-12">
+      <button class="btn btn-primary" type="submit">Zuschuss berechnen</button>
+      <span class="form-text d-block mt-2">Selbstnutzung, Altheizung und Wohneinheiten werden aus Kunde/Gebäude/Aufnahme übernommen.</span>
+    </div>
+  </form>
+</div></div>
+
+@if (Model.Ergebnis is { } b)
+{
+  <div class="row g-4" data-tour="fc-ergebnis">
+    <div class="col-md-6">
+      <div class="card border-primary h-100"><div class="card-body">
+        <h2 class="vl-label">Ergebnis zum @b.Eingabe.Stichtag.ToString("dd.MM.yyyy")</h2>
+        @if (!b.RegelwerkVerbindlich)
+        {
+          <div class="alert alert-warning py-1 small">Angekündigte, noch unverbindliche Förderstufe.</div>
+        }
+        <div class="d-flex align-items-baseline gap-2 mb-2">
+          <span class="vl-bignum">@b.Zuschuss.ToString("N0") €</span>
+          <span class="text-muted small">Zuschuss, gedeckelt @b.GedeckelterSatz.ToString("P0")</span>
+        </div>
+        <table class="table table-sm mb-2">
+          <tbody>
+          @foreach (var pos in b.Positionen)
+          {
+            <tr>
+              <td>@ArtLabel(pos.Art)</td>
+              <td class="text-end num">@pos.Satz.ToString("P0")</td>
+              <td class="text-end num">@pos.Betrag.ToString("N0") €</td>
+            </tr>
+          }
+          <tr>
+            <td>Förderfähige Kosten</td>
+            <td class="text-end num" colspan="2">@b.FoerderfaehigeKosten.ToString("N0") €</td>
+          </tr>
+          @if (Model.PreisNachFoerderung is { } pnf)
+          {
+            <tr class="table-success">
+              <td><strong>Preis nach Förderung (akt. Angebot)</strong></td>
+              <td class="text-end num" colspan="2"><strong>@pnf.ToString("N0") €</strong></td>
+            </tr>
+          }
+          </tbody>
+        </table>
+        <div class="small text-muted">@Model.Disclaimer</div>
+      </div></div>
+    </div>
+    @if (Model.Vergleich is { } v)
+    {
+      <div class="col-md-6">
+        <div class="card h-100"><div class="card-body">
+          <h2 class="vl-label">Vergleich zum @v.Eingabe.Stichtag.ToString("dd.MM.yyyy")</h2>
+          @if (!v.RegelwerkVerbindlich)
+          {
+            <div class="alert alert-warning py-1 small">Angekündigte, noch unverbindliche Förderstufe.</div>
+          }
+          <p class="mb-1">Zuschuss: <strong class="num">@v.Zuschuss.ToString("N0") €</strong> (@v.GedeckelterSatz.ToString("P0") von @v.FoerderfaehigeKosten.ToString("N0") €)</p>
+          <p class="fs-5 @(Model.Differenz > 0 ? "text-danger" : "text-success")">
+            @(Model.Differenz > 0 ? $"Warten kostet {Model.Differenz:N0} € Zuschuss." : "Kein Nachteil durch Warten.")
+          </p>
+          <div class="small text-muted">@Model.Disclaimer</div>
+        </div></div>
+      </div>
+    }
+  </div>
+}
+
+<div class="card mt-4" data-tour="fc-snapshots"><div class="card-body">
+  <h2 class="vl-label">Gespeicherte Berechnungen (Snapshots)</h2>
+  @if (Model.Projekt.Foerderberechnungen.Count == 0)
+  {
+    <p class="vl-empty mb-0">Noch keine Berechnung gespeichert.</p>
+  }
+  else
+  {
+    <table class="table table-sm small mb-0">
+      <tbody>
+      @foreach (var s in Enumerable.Reverse(Model.Projekt.Foerderberechnungen))
+      {
+        <tr>
+          <td class="num text-muted">@s.ErstelltUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+          <td>Stichtag @s.Eingabe.Stichtag.ToString("dd.MM.yyyy")</td>
+          <td class="text-end num">@s.Zuschuss.ToString("N0") €</td>
+          <td class="text-muted">@(s.RegelwerkVerbindlich ? "" : "unverbindlich")</td>
+        </tr>
+      }
+      </tbody>
+    </table>
+  }
+</div></div>

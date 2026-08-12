@@ -1,0 +1,61 @@
+@page
+@using Vorlauf.Domain.Projekte
+@model Vorlauf.Web.Pages.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="vl-pagehead">
+  <div>
+    <h1>Pipeline</h1>
+    <p class="text-muted small mb-0">Alle laufenden Projekte entlang der Prozessstrecke — vom kühlen Erstkontakt bis zum warmen Abschluss.</p>
+  </div>
+  <a class="btn btn-primary" asp-page="/Projekte/Neu">+ Neues Projekt</a>
+</div>
+
+<div class="vl-tour-banner" data-vl-tour-banner>
+  <div class="vl-tour-banner-text">
+    <strong>Neu hier? Geh die Prozesskette einmal komplett durch.</strong>
+    <span>Die Tour legt ein eigenes Demo-Projekt an und führt dich Klick für Klick von der Anfrage bis zur Schlussrechnung — mit echten Guards, Heizlast und Förderrechner.</span>
+  </div>
+  <div class="vl-tour-banner-cta">
+    <button class="btn btn-primary btn-lg" type="button" data-vl-tour-start>▶ Prozess-Tour starten</button>
+    <button class="vl-tour-banner-x" type="button" data-vl-tour-banner-weg aria-label="Banner ausblenden" title="Ausblenden">×</button>
+  </div>
+</div>
+
+<div class="vl-pipeline" data-tour="pipeline">
+  @foreach (var (status, anzahl) in Model.Pipeline)
+  {
+    <a class="vl-station @StatusAnzeige.Css(status)" asp-page="/Projekte/Index" asp-route-status="@status">
+      <span class="vl-station-count">@anzahl</span>
+      <span class="vl-station-label">@StatusAnzeige.Label(status)</span>
+    </a>
+  }
+</div>
+
+<div class="card mt-3" data-tour="ueberfaellig">
+  <div class="card-body">
+    <h2 class="vl-label">Überfällig — länger als 14 Tage im selben Status</h2>
+    @if (Model.Ueberfaellig.Count == 0)
+    {
+      <p class="vl-empty mb-0">Kein Projekt fällt durchs Raster.</p>
+    }
+    else
+    {
+      <table class="table table-sm table-hover mb-0">
+        <thead><tr><th>Projekt</th><th>Status</th><th class="text-end">Tage im Status</th></tr></thead>
+        <tbody>
+        @foreach (var (projekt, tage) in Model.Ueberfaellig)
+        {
+          <tr>
+            <td><a asp-page="/Projekte/Detail" asp-route-id="@projekt.Id">@projekt.Bezeichnung</a></td>
+            <td><span class="vl-status @StatusAnzeige.Css(projekt.Status)">@StatusAnzeige.Label(projekt.Status)</span></td>
+            <td class="text-end num">@tage</td>
+          </tr>
+        }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

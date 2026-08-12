@@ -1,0 +1,72 @@
+@page "{id:guid}"
+@using Vorlauf.Domain.Projekte
+@model Vorlauf.Web.Pages.Projekte.RechnungModel
+@{
+    ViewData["Title"] = "Rechnungen";
+}
+
+<div class="vl-pagehead">
+  <div>
+    <div class="vl-crumb"><a asp-page="/Projekte/Index">Projekte</a> / <a asp-page="/Projekte/Detail" asp-route-id="@Model.Projekt.Id">@Model.Projekt.Bezeichnung</a> /</div>
+    <h1>Rechnungen</h1>
+  </div>
+</div>
+
+<div class="card mb-3" style="max-width: 44rem;" data-tour="rechnungen-liste"><div class="card-body">
+  @if (Model.Projekt.Rechnungen.Count == 0)
+  {
+    <p class="vl-empty mb-0">Noch keine Rechnung.</p>
+  }
+  else
+  {
+    <table class="table table-sm table-hover mb-0">
+      <thead><tr><th>Nummer</th><th>Typ</th><th>Datum</th><th class="text-end">Brutto</th></tr></thead>
+      <tbody>
+      @foreach (var r in Model.Projekt.Rechnungen)
+      {
+        <tr>
+          <td class="num"><a asp-page="/Projekte/RechnungDetail" asp-route-id="@Model.Projekt.Id" asp-route-rechnungId="@r.Id" data-tour-rechnung>@r.Nummer</a></td>
+          <td>@r.Typ</td>
+          <td class="num">@r.Datum.ToString("dd.MM.yyyy")</td>
+          <td class="text-end num">@r.SummeBrutto.ToString("N2") €</td>
+        </tr>
+      }
+      </tbody>
+    </table>
+  }
+</div></div>
+
+@if (Model.Projekt.AktuellesAngebot is { Angenommen: true })
+{
+  <div class="card mb-3" style="max-width: 44rem;"><div class="card-body">
+    <h2 class="vl-label">Abschlagsrechnung stellen</h2>
+    <form method="post" asp-page-handler="Abschlag" class="row g-2" style="max-width: 26rem;">
+      <div class="col-6">
+        <input class="form-control num" name="betragBrutto" type="number" step="100" min="100" placeholder="Betrag brutto €" required />
+      </div>
+      <div class="col-6">
+        <button class="btn btn-outline-primary w-100" type="submit">Abschlag anlegen</button>
+      </div>
+    </form>
+    <div class="form-text mt-2">Üblich bei Auftragserteilung; die Schlussrechnung setzt gestellte Abschläge automatisch ab (§ 14 Abs. 5 UStG).</div>
+  </div></div>
+
+  <form method="post" asp-page-handler="Schlussrechnung" class="mt-2" data-tour="schlussrechnung">
+    <button class="btn btn-primary" type="submit">Schlussrechnung aus Angebot erzeugen</button>
+    <span class="form-text d-block">Positionen und Beträge kommen aus dem angenommenen Angebot; das Leistungsdatum aus der Abnahme.</span>
+  </form>
+}
+else
+{
+  <p class="text-muted small">Rechnungen erst nach angenommenem Angebot.</p>
+}
+
+<div class="alert alert-info mt-3" style="max-width: 44rem;">
+  <strong>Hinweis zur KfW-Förderung:</strong> Der Zuschuss wird <em>nicht</em> von der Rechnung abgezogen.
+  Der Kunde zahlt den Rechnungsbetrag und erhält den Zuschuss nach Einreichung des Verwendungsnachweises
+  direkt von der KfW. „Preis nach Förderung" ist deshalb ein Angebots-Argument, keine Rechnungsposition.
+</div>
+
+<div class="mt-3">
+  <a class="btn btn-outline-secondary" asp-page="/Projekte/Detail" asp-route-id="@Model.Projekt.Id">Zurück</a>
+</div>

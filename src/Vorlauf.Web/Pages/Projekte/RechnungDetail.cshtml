@@ -1,0 +1,72 @@
+@page "{id:guid}/{rechnungId:guid}"
+@using Vorlauf.Domain.Projekte
+@model Vorlauf.Web.Pages.Projekte.RechnungDetailModel
+@{
+    ViewData["Title"] = Model.Rechnung.Nummer;
+    var r = Model.Rechnung;
+}
+
+<div class="vl-pagehead">
+  <div>
+    <div class="vl-crumb">
+      <a asp-page="/Projekte/Index">Projekte</a> /
+      <a asp-page="/Projekte/Detail" asp-route-id="@Model.Projekt.Id">@Model.Projekt.Bezeichnung</a> /
+      <a asp-page="/Projekte/Rechnung" asp-route-id="@Model.Projekt.Id">Rechnungen</a> /
+    </div>
+    <h1>@(r.Typ == RechnungTyp.Abschlag ? "Abschlagsrechnung" : r.Typ == RechnungTyp.Teilrechnung ? "Teilrechnung" : "Schlussrechnung") <span class="num">@r.Nummer</span></h1>
+    <p class="text-muted small mb-0">
+      Rechnungsdatum @r.Datum.ToString("dd.MM.yyyy") ·
+      Leistungsdatum @(r.Leistungsdatum is { } l ? l.ToString("dd.MM.yyyy") : "wird erbracht (Anzahlung)")
+    </p>
+  </div>
+  <div class="d-flex gap-2" data-tour="rechnung-downloads">
+    <a class="btn btn-primary" asp-page-handler="Pdf" asp-route-id="@Model.Projekt.Id" asp-route-rechnungId="@r.Id">PDF herunterladen</a>
+    <a class="btn btn-outline-primary" asp-page-handler="Xml" asp-route-id="@Model.Projekt.Id" asp-route-rechnungId="@r.Id">XRechnung (XML)</a>
+  </div>
+</div>
+
+<div class="card mb-3" style="max-width: 52rem;"><div class="card-body">
+  <table class="table table-sm mb-0">
+    <thead><tr><th>Pos</th><th>Bezeichnung</th><th class="text-end">Menge</th><th>Einheit</th><th class="text-end">EP netto</th><th class="text-end">Gesamt netto</th></tr></thead>
+    <tbody>
+    @foreach (var pos in r.Positionen.OrderBy(p => p.Position))
+    {
+      <tr>
+        <td class="num">@pos.Position</td>
+        <td>@pos.Bezeichnung</td>
+        <td class="text-end num">@pos.Menge.ToString("0.##")</td>
+        <td>@pos.Einheit</td>
+        <td class="text-end num">@pos.EinzelpreisNetto.ToString("N2")</td>
+        <td class="text-end num">@pos.GesamtNetto.ToString("N2")</td>
+      </tr>
+    }
+    </tbody>
+    <tfoot>
+      <tr><td colspan="5" class="text-end">Netto</td><td class="text-end num">@r.SummeNetto.ToString("N2") €</td></tr>
+      <tr><td colspan="5" class="text-end">MwSt</td><td class="text-end num">@r.SummeMwSt.ToString("N2") €</td></tr>
+      <tr class="table-light"><td colspan="5" class="text-end"><strong>Brutto</strong></td><td class="text-end num"><strong>@r.SummeBrutto.ToString("N2") €</strong></td></tr>
+      @foreach (var a in Model.VerrechneteAbschlaege)
+      {
+        <tr><td colspan="5" class="text-end">abzüglich @a.Nummer vom @a.Datum.ToString("dd.MM.yyyy")</td><td class="text-end num">−@a.SummeBrutto.ToString("N2") €</td></tr>
+      }
+      @if (Model.VerrechneteAbschlaege.Count > 0)
+      {
+        <tr class="table-success"><td colspan="5" class="text-end"><strong>Verbleibender Restbetrag</strong></td><td class="text-end num"><strong>@Model.Restbetrag.ToString("N2") €</strong></td></tr>
+      }
+    </tfoot>
+  </table>
+</div></div>
+
+@if (r.Typ == RechnungTyp.Schlussrechnung && Model.VerrechneteAbschlaege.Count > 0)
+{
+  <p class="text-muted small" style="max-width: 52rem;">Die Schlussrechnung setzt bereits gestellte Abschläge ab (§ 14 Abs. 5 UStG); PDF und XRechnung weisen den Restbetrag als fälligen Betrag aus.</p>
+}
+
+<div class="alert alert-info" style="max-width: 52rem;">
+  <strong>Hinweis zur KfW-Förderung:</strong> Der Zuschuss wird <em>nicht</em> von der Rechnung abgezogen —
+  der Kunde zahlt den Rechnungsbetrag und erhält den Zuschuss direkt von der KfW.
+</div>
+
+<div class="mt-3">
+  <a class="btn btn-outline-secondary" asp-page="/Projekte/Rechnung" asp-route-id="@Model.Projekt.Id">Zurück zu den Rechnungen</a>
+</div>

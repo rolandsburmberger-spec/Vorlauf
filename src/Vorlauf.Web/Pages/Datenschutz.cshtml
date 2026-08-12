@@ -1,0 +1,21 @@
+@page
+@model Vorlauf.Web.Pages.DatenschutzModel
+@{
+    ViewData["Title"] = "Datenschutz";
+}
+
+<div class="vl-pagehead"><h1>Datenschutzerklärung</h1></div>
+
+<div class="card"><div class="card-body" style="max-width: 46rem;">
+  <p><strong>Kurzfassung:</strong> Diese Demo verarbeitet so wenig Daten wie möglich.</p>
+  <ul>
+    <li>Kein Tracking, keine Analyse-Tools, keine Werbe-Cookies.</li>
+    <li>Ein technisch notwendiges Sitzungs-Cookie wird ausschließlich für die Anmeldung gesetzt.</li>
+    <li>Schriftarten werden von Google Fonts geladen; dabei wird Ihre IP-Adresse an Google übertragen.
+        @* TODO: Für den öffentlichen Betrieb Fonts lokal einbinden, dann entfällt dieser Absatz. *@</li>
+    <li>Alle Demo-Daten (Kunden, Projekte, Adressen) sind fiktiv und werden regelmäßig zurückgesetzt.
+        Bitte geben Sie keine echten personenbezogenen Daten ein.</li>
+  </ul>
+  @* TODO: Vor Veröffentlichung Verantwortlichen mit Kontaktdaten benennen (Art. 13 DSGVO). *@
+  <p>Verantwortlich: siehe <a asp-page="/Impressum">Impressum</a>.</p>
+</div></div>

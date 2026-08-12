@@ -1,0 +1,497 @@
+/* ============================================================
+   Vorlauf — Designsystem
+   Konzept: Heizungstechnik-Farblogik. Der Vorlauf ist rot, der
+   Rücklauf blau. Projekte "erwärmen" sich entlang der Prozess-
+   strecke: kühles Blau (Anfrage) → warmes Vorlauf-Rot (Abschluss).
+   ============================================================ */
+
+:root {
+  /* Flächen */
+  --vl-ink: #1d232c;
+  --vl-ink-soft: #3a424e;
+  --vl-muted: #6f7681;
+  --vl-paper: #f6f3ec;
+  --vl-card: #ffffff;
+  --vl-line: #e4dfd3;
+  --vl-line-strong: #cfc8b8;
+  --vl-chrome: #151a22;
+  --vl-chrome-ink: #eef0f4;
+  --vl-chrome-muted: #9aa3b2;
+
+  /* Temperatur-Akzente */
+  --vl-warm: #cf4420;          /* Vorlauf-Rot */
+  --vl-warm-deep: #a83318;
+  --vl-warm-soft: #f6e3da;
+  --vl-cool: #33567e;          /* Rücklauf-Blau */
+  --vl-cool-soft: #e2e9f2;
+  --vl-ok: #33702f;
+  --vl-ok-soft: #e2eedd;
+  --vl-warn: #9a6a12;
+  --vl-warn-soft: #f7ecd4;
+  --vl-danger: #a92c22;
+  --vl-danger-soft: #f6dfdc;
+
+  /* Temperatur-Rampe der Prozessstrecke (kalt → heiß) */
+  --st-anfrage: #3d62a8;
+  --st-aufgenommen: #3a7ba6;
+  --st-foerderunggeprueft: #33959b;
+  --st-angeboten: #4d9c7d;
+  --st-beauftragt: #7ba04f;
+  --st-terminiert: #b39a35;
+  --st-inmontage: #d18a26;
+  --st-abgenommen: #d96f2b;
+  --st-berechnet: #d1512a;
+  --st-abgeschlossen: #c03a26;
+  --st-verloren: #8b8b85;
+
+  --vl-grad: linear-gradient(90deg,
+      #3d62a8 0%, #33959b 25%, #7ba04f 45%,
+      #d18a26 68%, #d1512a 85%, #c03a26 100%);
+
+  /* Typografie */
+  --vl-sans: "Archivo", "Segoe UI", system-ui, sans-serif;
+  --vl-mono: "Spline Sans Mono", "Cascadia Mono", Consolas, monospace;
+
+  --vl-radius: 10px;
+  --vl-radius-sm: 7px;
+  --vl-shadow: 0 1px 2px rgba(29, 35, 44, .06), 0 6px 18px -8px rgba(29, 35, 44, .12);
+}
+
+/* ---------- Basis ---------- */
+
+html { font-size: 15px; position: relative; min-height: 100%; }
+@media (min-width: 768px) { html { font-size: 16px; } }
+
+body {
+  font-family: var(--vl-sans);
+  background: var(--vl-paper);
+  color: var(--vl-ink);
+  margin: 0;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+main { flex: 1 0 auto; }
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--vl-sans);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--vl-ink);
+}
+
+a { color: var(--vl-warm-deep); text-decoration: none; }
+a:hover { color: var(--vl-warm); text-decoration: underline; }
+
+code { color: var(--vl-warm-deep); background: var(--vl-warm-soft); padding: .1em .35em; border-radius: 4px; }
+
+::selection { background: var(--vl-warm); color: #fff; }
+
+/* Kleine Zwischenüberschriften im Datenblatt-Stil */
+.vl-label,
+.vl-section h2, h2.vl-section {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--vl-muted);
+  margin-bottom: .6rem;
+}
+
+.num, .vl-num { font-family: var(--vl-mono); font-variant-numeric: tabular-nums; }
+
+/* ---------- Kopfzeile ---------- */
+
+.vl-header {
+  background: var(--vl-chrome);
+  color: var(--vl-chrome-ink);
+  position: relative;
+}
+.vl-header::after {            /* die "Rohrleitung" unter der Navigation */
+  content: "";
+  display: block;
+  height: 3px;
+  background: var(--vl-grad);
+}
+.vl-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  padding: .65rem 1.25rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+.vl-brand {
+  display: flex; align-items: center; gap: .55rem;
+  font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em;
+  color: var(--vl-chrome-ink) !important; text-decoration: none !important;
+}
+.vl-brand svg { display: block; }
+.vl-nav-links { display: flex; gap: .25rem; flex: 1; }
+.vl-nav a.vl-nav-link {
+  color: var(--vl-chrome-muted);
+  padding: .35rem .7rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: .92rem;
+  text-decoration: none;
+}
+.vl-nav a.vl-nav-link:hover { color: var(--vl-chrome-ink); background: rgba(255,255,255,.06); }
+.vl-nav a.vl-nav-link.aktiv { color: var(--vl-chrome-ink); background: rgba(255,255,255,.10); }
+.vl-nav-user { display: flex; align-items: center; gap: .6rem; color: var(--vl-chrome-muted); font-size: .88rem; }
+.vl-nav-user .vl-user-name { font-family: var(--vl-mono); font-size: .82rem; }
+
+/* ---------- Fußzeile ---------- */
+
+.vl-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--vl-line);
+  color: var(--vl-muted);
+  font-size: .8rem;
+  padding: 1rem 0 1.4rem;
+  margin-top: 3rem;
+}
+.vl-footer a { color: var(--vl-muted); text-decoration: underline; }
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  font-family: var(--vl-sans);
+  font-weight: 650;
+  border-radius: var(--vl-radius-sm);
+  transition: transform .06s ease, box-shadow .12s ease, background .12s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary {
+  --bs-btn-bg: var(--vl-warm);
+  --bs-btn-border-color: var(--vl-warm);
+  --bs-btn-hover-bg: var(--vl-warm-deep);
+  --bs-btn-hover-border-color: var(--vl-warm-deep);
+  --bs-btn-active-bg: var(--vl-warm-deep);
+  --bs-btn-active-border-color: var(--vl-warm-deep);
+  box-shadow: 0 2px 10px -3px rgba(207, 68, 32, .55);
+}
+.btn-success {
+  --bs-btn-bg: var(--vl-ok);
+  --bs-btn-border-color: var(--vl-ok);
+  --bs-btn-hover-bg: #2a5c27;
+  --bs-btn-hover-border-color: #2a5c27;
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--vl-warm-deep);
+  --bs-btn-border-color: var(--vl-warm);
+  --bs-btn-hover-bg: var(--vl-warm);
+  --bs-btn-hover-border-color: var(--vl-warm);
+  --bs-btn-active-bg: var(--vl-warm-deep);
+  --bs-btn-active-border-color: var(--vl-warm-deep);
+}
+.btn-outline-secondary {
+  --bs-btn-color: var(--vl-ink-soft);
+  --bs-btn-border-color: var(--vl-line-strong);
+  --bs-btn-hover-bg: var(--vl-ink);
+  --bs-btn-hover-border-color: var(--vl-ink);
+  --bs-btn-hover-color: #fff;
+}
+.btn-outline-danger {
+  --bs-btn-color: var(--vl-danger);
+  --bs-btn-border-color: var(--vl-danger);
+  --bs-btn-hover-bg: var(--vl-danger);
+  --bs-btn-hover-border-color: var(--vl-danger);
+}
+
+.btn:focus-visible, .form-control:focus, .form-select:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 .2rem rgba(207, 68, 32, .25);
+  border-color: var(--vl-warm);
+}
+
+/* ---------- Karten / Formulare / Tabellen ---------- */
+
+.card {
+  border: 1px solid var(--vl-line);
+  border-radius: var(--vl-radius);
+  box-shadow: var(--vl-shadow);
+  background: var(--vl-card);
+}
+.card.border-primary { border-color: var(--vl-warm); border-width: 1.5px; }
+
+.form-control, .form-select {
+  border-color: var(--vl-line-strong);
+  border-radius: var(--vl-radius-sm);
+  background-color: #fff;
+}
+.form-label { font-weight: 600; font-size: .86rem; color: var(--vl-ink-soft); }
+.form-check-input:checked { background-color: var(--vl-warm); border-color: var(--vl-warm); }
+.form-text { color: var(--vl-muted); }
+
+.table { --bs-table-hover-bg: #faf7f0; border-color: var(--vl-line); }
+.table thead th {
+  font-size: .72rem; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--vl-muted); font-weight: 700; border-bottom: 2px solid var(--vl-line-strong);
+}
+.table td { vertical-align: middle; }
+.table .table-light { --bs-table-bg: #f4f0e7; }
+.table .table-success { --bs-table-bg: var(--vl-ok-soft); }
+
+.alert { border-radius: var(--vl-radius-sm); border-width: 0; border-left: 4px solid transparent; }
+.alert-danger  { background: var(--vl-danger-soft); border-left-color: var(--vl-danger); color: #6d1d16; }
+.alert-success { background: var(--vl-ok-soft);     border-left-color: var(--vl-ok);     color: #234d20; }
+.alert-warning { background: var(--vl-warn-soft);   border-left-color: var(--vl-warn);   color: #634408; }
+.alert-info    { background: var(--vl-cool-soft);   border-left-color: var(--vl-cool);   color: #24405e; }
+
+/* ---------- Statusbadges (Temperatur-Rampe) ---------- */
+
+.vl-status {
+  --st: var(--vl-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--st);
+  background: color-mix(in srgb, var(--st) 12%, #fff);
+  border: 1px solid color-mix(in srgb, var(--st) 38%, #fff);
+  border-radius: 999px;
+  padding: .18rem .6rem .18rem .5rem;
+  white-space: nowrap;
+}
+.vl-status::before {
+  content: "";
+  width: .5rem; height: .5rem; border-radius: 50%;
+  background: var(--st);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--st) 65%, transparent);
+}
+.vl-status-lg { font-size: .92rem; padding: .3rem .85rem .3rem .7rem; }
+
+.st-anfrage           { --st: var(--st-anfrage); }
+.st-aufgenommen       { --st: var(--st-aufgenommen); }
+.st-foerderunggeprueft{ --st: var(--st-foerderunggeprueft); }
+.st-angeboten         { --st: var(--st-angeboten); }
+.st-beauftragt        { --st: var(--st-beauftragt); }
+.st-terminiert        { --st: var(--st-terminiert); }
+.st-inmontage         { --st: var(--st-inmontage); }
+.st-abgenommen        { --st: var(--st-abgenommen); }
+.st-berechnet         { --st: var(--st-berechnet); }
+.st-abgeschlossen     { --st: var(--st-abgeschlossen); }
+.st-verloren          { --st: var(--st-verloren); }
+
+/* ---------- Pipeline (Dashboard + Landing) ---------- */
+
+.vl-pipeline {
+  display: flex;
+  gap: .5rem;
+  overflow-x: auto;
+  padding: 1.1rem .25rem 1.25rem;
+  position: relative;
+}
+.vl-pipeline::before {          /* die Rohrleitung hinter den Stationen */
+  content: "";
+  position: absolute;
+  left: .25rem; right: .25rem; top: 50%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--vl-grad);
+  opacity: .35;
+}
+.vl-station {
+  --st: var(--vl-muted);
+  position: relative;
+  flex: 1 1 0;
+  min-width: 6.2rem;
+  background: var(--vl-card);
+  border: 1px solid var(--vl-line);
+  border-top: 3px solid var(--st);
+  border-radius: var(--vl-radius-sm);
+  box-shadow: var(--vl-shadow);
+  padding: .55rem .5rem .5rem;
+  text-align: center;
+  text-decoration: none !important;
+  transition: transform .1s ease, box-shadow .12s ease;
+}
+.vl-station:hover { transform: translateY(-3px); box-shadow: 0 8px 22px -8px rgba(29,35,44,.28); }
+.vl-station-count {
+  display: block;
+  font-family: var(--vl-mono);
+  font-size: 1.7rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--st);
+}
+.vl-station-label {
+  display: block;
+  font-size: .66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--vl-muted);
+  margin-top: .15rem;
+}
+
+/* ---------- Seitenkopf ---------- */
+
+.vl-pagehead { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin: 1.6rem 0 .35rem; flex-wrap: wrap; }
+.vl-pagehead h1 { font-size: 1.45rem; margin: 0; }
+.vl-pagehead .vl-crumb { font-size: .8rem; color: var(--vl-muted); margin-bottom: .15rem; }
+.vl-pagehead .vl-crumb a { color: var(--vl-muted); }
+
+/* Aktionsleiste auf der Detailseite */
+.vl-actions { display: flex; gap: .45rem; flex-wrap: wrap; margin: 1rem 0 1.25rem; }
+.vl-actions .btn { font-size: .85rem; }
+
+/* Datenblatt-Zusammenfassung */
+.vl-fact { display: flex; gap: .6rem; padding: .42rem 0; border-bottom: 1px dotted var(--vl-line-strong); font-size: .9rem; }
+.vl-fact:last-child { border-bottom: 0; }
+.vl-fact .k { flex: 0 0 11rem; color: var(--vl-muted); font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding-top: .1rem; }
+.vl-fact .v { flex: 1; }
+
+/* Ergebniszahl im Fördercheck */
+.vl-bignum { font-family: var(--vl-mono); font-size: 2.1rem; font-weight: 600; color: var(--vl-warm-deep); line-height: 1.1; }
+
+/* ---------- Login ---------- */
+
+.vl-login-wrap { display: grid; grid-template-columns: 1fr; max-width: 900px; margin: 3rem auto; border-radius: 14px; overflow: hidden; box-shadow: 0 12px 40px -12px rgba(21,26,34,.4); }
+@media (min-width: 860px) { .vl-login-wrap { grid-template-columns: 1.1fr 1fr; } }
+.vl-login-brand {
+  background: var(--vl-chrome);
+  color: var(--vl-chrome-ink);
+  padding: 2.5rem 2.2rem;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 2rem;
+  position: relative;
+}
+.vl-login-brand::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 3px; background: var(--vl-grad); opacity: .9; }
+.vl-login-brand h1 { color: var(--vl-chrome-ink); font-size: 1.9rem; margin: .8rem 0 .4rem; }
+.vl-login-brand p { color: var(--vl-chrome-muted); font-size: .95rem; }
+.vl-login-form { background: var(--vl-card); padding: 2.5rem 2.2rem; }
+
+/* ---------- Landing ---------- */
+
+.vl-hero {
+  background: var(--vl-chrome);
+  color: var(--vl-chrome-ink);
+  padding: 4.5rem 0 4rem;
+  position: relative;
+  overflow: hidden;
+}
+.vl-hero::before {   /* technische Blaupausen-Textur */
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at 30% 0%, #000 30%, transparent 75%);
+}
+.vl-hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--vl-grad); }
+.vl-hero .inner { position: relative; }
+.vl-hero .vl-kicker {
+  font-family: var(--vl-mono); font-size: .8rem; letter-spacing: .18em;
+  text-transform: uppercase; color: #e0885f; margin-bottom: 1rem;
+}
+.vl-hero h1 { color: #fff; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; max-width: 21ch; }
+.vl-hero .lead { color: var(--vl-chrome-muted); max-width: 58ch; font-size: 1.05rem; margin-top: 1.1rem; }
+.vl-hero .cta { margin-top: 2rem; display: flex; gap: .7rem; flex-wrap: wrap; }
+.btn-hero-ghost {
+  --bs-btn-color: var(--vl-chrome-ink);
+  --bs-btn-border-color: rgba(255,255,255,.35);
+  --bs-btn-hover-bg: rgba(255,255,255,.1);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-border-color: rgba(255,255,255,.6);
+}
+
+.vl-section { padding: 3.2rem 0 0; }
+.vl-section > .container > h2, .vl-section-title {
+  font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1.2rem;
+}
+.vl-section-num { font-family: var(--vl-mono); color: var(--vl-warm); font-size: .85rem; margin-right: .5rem; }
+
+.vl-feature {
+  background: var(--vl-card);
+  border: 1px solid var(--vl-line);
+  border-radius: var(--vl-radius);
+  box-shadow: var(--vl-shadow);
+  padding: 1.25rem 1.2rem;
+  height: 100%;
+}
+.vl-feature h3 { font-size: 1rem; font-weight: 750; margin: .55rem 0 .35rem; }
+.vl-feature p { font-size: .88rem; color: var(--vl-ink-soft); margin: 0; }
+.vl-feature .ico {
+  width: 2.2rem; height: 2.2rem; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--vl-warm-soft); color: var(--vl-warm-deep); font-size: 1.1rem;
+}
+
+.vl-arch {
+  font-family: var(--vl-mono); font-size: .85rem;
+  background: var(--vl-chrome); color: #c7cedb;
+  border-radius: var(--vl-radius);
+  padding: 1.4rem 1.5rem;
+  overflow-x: auto;
+  line-height: 1.75;
+}
+.vl-arch .hl { color: #e0885f; }
+.vl-arch .dim { color: #6d7686; }
+
+/* ---------- Tour-Banner (Dashboard) ---------- */
+
+.vl-tour-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  background: var(--vl-chrome);
+  color: var(--vl-chrome-ink);
+  border-radius: var(--vl-radius);
+  padding: 1.1rem 1.3rem;
+  margin: .35rem 0 .5rem;
+  position: relative;
+  overflow: hidden;
+}
+.vl-tour-banner::before {      /* Rohrleitungs-Kante links */
+  content: "";
+  position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
+  background: var(--vl-grad);
+}
+.vl-tour-banner-text { display: flex; flex-direction: column; gap: .2rem; max-width: 46rem; }
+.vl-tour-banner-text strong { font-size: 1.05rem; }
+.vl-tour-banner-text span { color: var(--vl-chrome-muted); font-size: .88rem; }
+.vl-tour-banner-cta { display: flex; align-items: center; gap: .6rem; }
+.vl-tour-banner-cta .btn-primary { box-shadow: 0 4px 18px -4px rgba(207, 68, 32, .8); }
+.vl-tour-banner-x {
+  background: none; border: 0; color: var(--vl-chrome-muted);
+  font-size: 1.4rem; line-height: 1; padding: .2rem .45rem; border-radius: 6px; cursor: pointer;
+}
+.vl-tour-banner-x:hover { color: var(--vl-chrome-ink); background: rgba(255,255,255,.08); }
+
+/* ---------- Tour ---------- */
+
+.vl-tour-highlight {
+  position: relative;
+  z-index: 1051;
+  box-shadow: 0 0 0 4px var(--vl-warm), 0 0 0 9999px rgba(15, 18, 24, .55) !important;
+  border-radius: 8px;
+  background: var(--vl-card);
+}
+.vl-tour-pop {
+  position: absolute;
+  z-index: 1052;
+  width: min(21rem, calc(100vw - 2rem));
+  background: var(--vl-card);
+  border-radius: var(--vl-radius);
+  border-top: 3px solid var(--vl-warm);
+  box-shadow: 0 18px 50px -12px rgba(15,18,24,.5);
+  padding: 1rem 1.1rem .9rem;
+}
+.vl-tour-pop h3 { font-size: .98rem; font-weight: 750; margin: 0 0 .35rem; }
+.vl-tour-pop p { font-size: .87rem; color: var(--vl-ink-soft); margin: 0 0 .8rem; }
+.vl-tour-pop .vl-tour-foot { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
+.vl-tour-pop .vl-tour-progress { font-family: var(--vl-mono); font-size: .75rem; color: var(--vl-muted); }
+.vl-tour-pop .vl-tour-btns { display: flex; gap: .4rem; }
+
+/* ---------- Kleinkram ---------- */
+
+.text-muted { color: var(--vl-muted) !important; }
+.vl-empty { color: var(--vl-muted); font-size: .92rem; padding: 1.2rem 0; }
+canvas#unterschrift { border: 1.5px dashed var(--vl-line-strong) !important; border-radius: var(--vl-radius-sm); background: #fff; }

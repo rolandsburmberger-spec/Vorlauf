@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!--
+    EF-Stack bewusst auf 9.0.x gepinnt: Pomelo (MySQL-Provider) unterstützt
+    EF Core 10 noch nicht (Stand 08/2026, letzte Version 9.0.0). Läuft
+    problemlos unter net10.0. Bump auf 10.x, sobald Pomelo nachzieht.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.*" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.*" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
+    <!-- Transitive Pin: EF Sqlite 9.0.x bringt SQLitePCLRaw 2.1.10 mit (NU1903, GHSA-2m69-gcr7-jv3q) -->
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
+    <!-- Dokumente: PDF (QuestPDF, Community-Lizenz) und XRechnung/ZUGFeRD (Plan §8) -->
+    <PackageReference Include="QuestPDF" Version="2026.7.2" />
+    <PackageReference Include="ZUGFeRD-csharp" Version="18.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vorlauf.Domain\Vorlauf.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,32 @@
+@page "{id:guid}"
+@model Vorlauf.Web.Pages.Projekte.TerminModel
+@{
+    ViewData["Title"] = "Montagetermin";
+    var t = Model.Projekt.Montagetermin;
+}
+
+<div class="vl-pagehead">
+  <div>
+    <div class="vl-crumb"><a asp-page="/Projekte/Index">Projekte</a> / <a asp-page="/Projekte/Detail" asp-route-id="@Model.Projekt.Id">@Model.Projekt.Bezeichnung</a> /</div>
+    <h1>Montagetermin</h1>
+  </div>
+</div>
+
+<div class="card" style="max-width: 28rem;" data-tour="termin-form"><div class="card-body">
+  <form method="post">
+    <div class="mb-3">
+      <label class="form-label">Start</label>
+      <input class="form-control" name="start" type="date" value="@t?.Start?.ToString("yyyy-MM-dd")" required />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Ende (optional)</label>
+      <input class="form-control" name="ende" type="date" value="@t?.Ende?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Team</label>
+      <input class="form-control" name="team" value="@t?.Team" required placeholder="Team Nord" />
+    </div>
+    <button class="btn btn-primary" type="submit">Speichern</button>
+    <a class="btn btn-outline-secondary" asp-page="/Projekte/Detail" asp-route-id="@Model.Projekt.Id">Zurück</a>
+  </form>
+</div></div>

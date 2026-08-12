@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Vorlauf — Prozesssoftware für Wärmepumpen-Projekte im SHK-Betrieb: Prozessstrecke, KfW-458-Förderrechner, Heizlast-Überschlag." />
+    <title>@ViewData["Title"] — Vorlauf</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 18'%3E%3Cpath d='M2 5h14' stroke='%23cf4420' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M16 1l8 4-8 4z' fill='%23cf4420'/%3E%3Cpath d='M10 13h14' stroke='%2333567e' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M10 9l-8 4 8 4z' fill='%2333567e'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..800&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="vl-header">
+        <nav class="vl-nav">
+            <a class="vl-brand" href="/">
+                <svg width="26" height="18" viewBox="0 0 26 18" aria-hidden="true">
+                    <path d="M2 5h14" stroke="#cf4420" stroke-width="3" stroke-linecap="round" />
+                    <path d="M16 1l8 4-8 4z" fill="#cf4420" />
+                    <path d="M10 13h14" stroke="#33567e" stroke-width="3" stroke-linecap="round" />
+                    <path d="M10 9l-8 4 8 4z" fill="#33567e" />
+                </svg>
+                Vorlauf
+            </a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                var aktuelleSeite = ViewContext.RouteData.Values["page"] as string;
+                <div class="vl-nav-links">
+                    <a class="vl-nav-link @(aktuelleSeite == "/Dashboard" ? "aktiv" : "")" asp-page="/Dashboard">Dashboard</a>
+                    <a class="vl-nav-link @(aktuelleSeite?.StartsWith("/Projekte") == true ? "aktiv" : "")" asp-page="/Projekte/Index">Projekte</a>
+                </div>
+                <div class="vl-nav-user">
+                    <button class="btn btn-sm btn-primary" type="button" data-vl-tour-start>▶ Prozess-Tour</button>
+                    <span class="vl-user-name">@User.Identity.Name</span>
+                    <form method="post" asp-page="/Login" asp-page-handler="Abmelden" class="d-inline">
+                        <button class="btn btn-sm btn-hero-ghost" type="submit">Abmelden</button>
+                    </form>
+                </div>
+            }
+            else
+            {
+                <div class="vl-nav-links"></div>
+                <a class="btn btn-sm btn-primary" asp-page="/Login">Anmelden</a>
+            }
+        </nav>
+    </header>
+
+    <main role="main">
+        @if ((bool?)ViewData["FullWidth"] == true)
+        {
+            @RenderBody()
+        }
+        else
+        {
+            <div class="container pb-4">
+                @RenderBody()
+            </div>
+        }
+    </main>
+
+    <footer class="vl-footer">
+        <div class="container d-flex flex-wrap gap-3 justify-content-between">
+            <span>Vorlauf — Demo-Projekt. Förderangaben sind unverbindliche Orientierung; maßgeblich sind die KfW-Bedingungen am Tag der Antragstellung.</span>
+            <span>
+                <a asp-page="/Impressum">Impressum</a> ·
+                <a asp-page="/Datenschutz">Datenschutz</a> ·
+                @* TODO: echte Repo-URL eintragen, sobald das Repo auf GitHub liegt *@
+                <a href="https://github.com/" rel="noopener">GitHub</a>
+            </span>
+        </div>
+    </footer>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

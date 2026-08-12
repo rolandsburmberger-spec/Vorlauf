@@ -22,3 +22,40 @@ jobs:
 
       - name: Test
         run: dotnet test --no-build --configuration Release --verbosity normal
+
+  # Erzeugte XRechnung gegen die offiziellen KoSIT-Schematron-Regeln prüfen —
+  # ohne diese Validierung ist der Export wertlos (Plan §8).
+  xrechnung-kosit:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: XRechnung-Beispiel erzeugen
+        run: dotnet run --project tools/Vorlauf.Beispiele -- out/xrechnung-beispiel.xml
+
+      - name: KoSIT-Validator + XRechnung-Konfiguration laden (gepinnt)
+        run: |
+          curl -sSLf -o validator.jar https://github.com/itplr-kosit/validator/releases/download/v1.6.2/validator-1.6.2-standalone.jar
+          curl -sSLf -o konfiguration.zip https://github.com/itplr-kosit/validator-configuration-xrechnung/releases/download/v2026-01-31/xrechnung-3.0.2-validator-configuration-2026-01-31.zip
+          mkdir konfiguration && unzip -q konfiguration.zip -d konfiguration
+
+      - name: XRechnung validieren (KoSIT)
+        run: java -jar validator.jar -s konfiguration/scenarios.xml -r konfiguration -h out/xrechnung-beispiel.xml
+
+      - name: Prüfbericht als Artefakt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kosit-pruefbericht
+          path: out/*-report.*
+          if-no-files-found: ignore

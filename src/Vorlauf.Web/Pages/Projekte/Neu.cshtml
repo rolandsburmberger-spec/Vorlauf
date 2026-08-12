@@ -1,0 +1,45 @@
+@page
+@model Vorlauf.Web.Pages.Projekte.NeuModel
+@{
+    ViewData["Title"] = "Neues Projekt";
+}
+
+<div class="vl-pagehead">
+  <div>
+    <div class="vl-crumb"><a asp-page="/Projekte/Index">Projekte</a> /</div>
+    <h1>Neues Projekt (Anfrage)</h1>
+  </div>
+</div>
+
+<div class="card" style="max-width: 40rem;" data-tour="neu-form"><div class="card-body">
+  <form method="post">
+    <div class="mb-3">
+      <label class="form-label">Bezeichnung</label>
+      <input class="form-control" name="bezeichnung" required placeholder="WP Musterweg 1, Fulda" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Kunde</label>
+      <input class="form-control" name="kundeName" required />
+    </div>
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" name="selbstnutzer" value="true" checked id="sn" />
+      <label class="form-check-label" for="sn">Selbstnutzer (Voraussetzung für Klima- und Einkommensbonus)</label>
+    </div>
+    <div class="row">
+      <div class="col-4 mb-3">
+        <label class="form-label">Baujahr Gebäude</label>
+        <input class="form-control num" name="baujahr" type="number" min="1800" max="2026" />
+      </div>
+      <div class="col-4 mb-3">
+        <label class="form-label">Wohnfläche (m²)</label>
+        <input class="form-control num" name="wohnflaeche" type="number" step="1" min="20" />
+      </div>
+      <div class="col-4 mb-3">
+        <label class="form-label">Wohneinheiten</label>
+        <input class="form-control num" name="wohneinheiten" type="number" value="1" min="1" />
+      </div>
+    </div>
+    <button class="btn btn-primary" type="submit">Anlegen</button>
+    <a class="btn btn-outline-secondary" asp-page="/Projekte/Index">Abbrechen</a>
+  </form>
+</div></div>

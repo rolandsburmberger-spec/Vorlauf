@@ -1,0 +1,61 @@
+@page
+@model Vorlauf.Web.Pages.LoginModel
+@{
+    ViewData["Title"] = "Anmelden";
+    ViewData["FullWidth"] = true;
+}
+
+<div class="container">
+  <div class="vl-login-wrap">
+    <div class="vl-login-brand">
+      <div>
+        <svg width="42" height="30" viewBox="0 0 26 18" aria-hidden="true">
+          <path d="M2 5h14" stroke="#cf4420" stroke-width="3" stroke-linecap="round" />
+          <path d="M16 1l8 4-8 4z" fill="#cf4420" />
+          <path d="M10 13h14" stroke="#5b83ad" stroke-width="3" stroke-linecap="round" />
+          <path d="M10 9l-8 4 8 4z" fill="#5b83ad" />
+        </svg>
+        <h1>Vorlauf</h1>
+        <p>Die Prozessstrecke für Wärmepumpen-Projekte: Förder-Schnellcheck, harte KfW-Guards und ein Dashboard,
+           auf dem kein Projekt durchs Raster fällt.</p>
+      </div>
+      <p class="mb-0" style="font-size:.8rem;">Demo-Zugang: <code>demo / demo</code> · Admin: <code>admin / admin</code></p>
+    </div>
+    <div class="vl-login-form">
+      <h2 class="h5 mb-3">Anmelden</h2>
+      @if (Model.Fehler is not null)
+      {
+        <div class="alert alert-danger">@Model.Fehler</div>
+      }
+      <form method="post">
+        <div class="mb-3">
+          <label class="form-label" for="benutzer">Benutzer</label>
+          <input class="form-control" id="benutzer" name="benutzer" autofocus autocomplete="username" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="passwort">Passwort</label>
+          <input class="form-control" id="passwort" name="passwort" type="password" autocomplete="current-password" />
+        </div>
+        <button class="btn btn-primary w-100" type="submit">Anmelden</button>
+        <button class="btn btn-outline-secondary w-100 mt-2" type="button" id="demoZugang">Demo-Zugang übernehmen</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+  (function () {
+    var params = new URLSearchParams(location.search);
+    if (params.get('tour') === '1') {
+      sessionStorage.setItem('vl-tour-pending', '1');
+    }
+    function fuelleDemo() {
+      document.getElementById('benutzer').value = 'demo';
+      document.getElementById('passwort').value = 'demo';
+    }
+    if (params.get('demo') === '1') { fuelleDemo(); }
+    document.getElementById('demoZugang').addEventListener('click', fuelleDemo);
+  })();
+</script>
+}

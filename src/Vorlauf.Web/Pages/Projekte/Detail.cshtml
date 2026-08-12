@@ -1,0 +1,89 @@
+@page "{id:guid}"
+@using Vorlauf.Domain.Projekte
+@model Vorlauf.Web.Pages.Projekte.DetailModel
+@{
+    ViewData["Title"] = Model.Projekt.Bezeichnung;
+    var p = Model.Projekt;
+}
+
+<div class="vl-pagehead">
+  <div>
+    <div class="vl-crumb"><a asp-page="/Projekte/Index">Projekte</a> /</div>
+    <h1>@p.Bezeichnung</h1>
+    <p class="text-muted small mb-0">
+      @p.Kunde?.Name@(p.Kunde?.Selbstnutzer == true ? " · Selbstnutzer" : "") ·
+      Gebäude @p.Gebaeude?.Baujahr · @p.Gebaeude?.WohnflaecheM2 m² · @p.Gebaeude?.Wohneinheiten WE
+    </p>
+  </div>
+  <span class="vl-status vl-status-lg @StatusAnzeige.Css(p.Status)">@StatusAnzeige.Label(p.Status)</span>
+</div>
+
+@if (TempData["Fehler"] is string fehler)
+{
+  <div class="alert alert-danger">@fehler</div>
+}
+@if (TempData["Ok"] is string ok)
+{
+  <div class="alert alert-success">@ok</div>
+}
+
+<div class="vl-actions" data-tour="aktionen">
+  <a class="btn btn-outline-secondary" asp-page="/Projekte/Aufnahme" asp-route-id="@p.Id">Aufnahme</a>
+  <a class="btn btn-outline-secondary" asp-page="/Projekte/Foerdercheck" asp-route-id="@p.Id" data-tour-foerdercheck>Förder-Check</a>
+  <a class="btn btn-outline-secondary" asp-page="/Projekte/Angebot" asp-route-id="@p.Id">Angebot</a>
+  <a class="btn btn-outline-secondary" asp-page="/Projekte/Termin" asp-route-id="@p.Id">Termin</a>
+  <a class="btn btn-outline-secondary" asp-page="/Projekte/Abnahme" asp-route-id="@p.Id">Abnahme</a>
+  <a class="btn btn-outline-secondary" asp-page="/Projekte/Rechnung" asp-route-id="@p.Id">Rechnung</a>
+</div>
+
+<div class="card mb-4" data-tour="statuswechsel">
+  <div class="card-body">
+    <h2 class="vl-label">Statuswechsel</h2>
+    @if (Model.MoeglicheZiele.Count == 0)
+    {
+      <span class="text-muted">Endzustand — keine Übergänge mehr.</span>
+    }
+    else
+    {
+      <form method="post" asp-page-handler="Wechsel" class="d-inline">
+        @foreach (var ziel in Model.MoeglicheZiele)
+        {
+          <button class="btn btn-outline-primary btn-sm me-1 mb-1" name="ziel" value="@ziel" type="submit">→ @StatusAnzeige.Label(ziel)</button>
+        }
+      </form>
+    }
+    <div class="form-text">Guards blockieren Übergänge mit fehlenden Vorbedingungen und nennen den Grund.</div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card h-100"><div class="card-body">
+      <h2 class="vl-label">Zusammenfassung</h2>
+      <div class="vl-fact"><span class="k">Aufnahme</span><span class="v">@(p.Aufnahme is { IstVollstaendig: true } ? $"vollständig, Heizlast {p.Aufnahme.BerechneteHeizlastKw} kW" : p.Aufnahme is null ? "fehlt" : "unvollständig")</span></div>
+      <div class="vl-fact"><span class="k">Förderberechnung</span><span class="v">@(p.AktuelleFoerderberechnung is { } b ? $"{b.Zuschuss:N0} € ({b.GedeckelterSatz:P0}), Stichtag {b.Eingabe.Stichtag:dd.MM.yyyy}{(b.RegelwerkVerbindlich ? "" : " — unverbindliche Zukunftsstufe")}" : "fehlt")</span></div>
+      <div class="vl-fact"><span class="k">Angebot</span><span class="v">@(p.AktuellesAngebot is { } a ? $"{a.Nummer}, {a.SummeBrutto:N0} € brutto{(a.Angenommen ? ", angenommen" : "")}" : "fehlt")</span></div>
+      <div class="vl-fact"><span class="k">Termin</span><span class="v">@(p.Montagetermin is { Start: { } s } ? $"{s:dd.MM.yyyy} ({p.Montagetermin.Team})" : "offen")</span></div>
+      <div class="vl-fact"><span class="k">Abnahme</span><span class="v">@(p.Abnahme is { InbetriebnahmeDatum: { } d } ? $"{d:dd.MM.yyyy}, Fachunternehmererklärung {(p.Abnahme.FachunternehmererklaerungAusgestellt ? "ja" : "nein")}" : "offen")</span></div>
+      <div class="vl-fact"><span class="k">Rechnungen</span><span class="v">@(p.Rechnungen.Count == 0 ? "keine" : string.Join(", ", p.Rechnungen.Select(r => $"{r.Nummer} ({r.Typ})")))</span></div>
+    </div></div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100" data-tour="historie"><div class="card-body">
+      <h2 class="vl-label">Historie</h2>
+      <table class="table table-sm small mb-0">
+        <tbody>
+        @foreach (var h in Enumerable.Reverse(p.Historie))
+        {
+          <tr>
+            <td class="num text-muted">@h.ZeitpunktUtc.ToLocalTime().ToString("dd.MM.yy HH:mm")</td>
+            <td>@StatusAnzeige.Label(h.Von) → <span class="vl-status @StatusAnzeige.Css(h.Nach)">@StatusAnzeige.Label(h.Nach)</span></td>
+            <td>@h.Benutzer</td>
+            <td class="text-muted">@h.Bemerkung</td>
+          </tr>
+        }
+        </tbody>
+      </table>
+    </div></div>
+  </div>
+</div>
