@@ -6,6 +6,11 @@ Kein CRM, kein ERP. Eine Web-Anwendung für genau ein Geschäftsobjekt, dafür m
 
 C# · ASP.NET Core Razor Pages (.NET 10) · EF Core · QuestPDF · ZUGFeRD-csharp · xUnit · GitHub Actions
 
+**▶ Live-Demo: [vorlauf-8tge.onrender.com](https://vorlauf-8tge.onrender.com)** — Zugang `demo` / `demo`.
+Die **Prozess-Tour** legt ein eigenes Projekt an und führt es einmal komplett von der Anfrage bis zur
+Schlussrechnung. Die Instanz läuft im kostenlosen Tarif und fährt bei Inaktivität herunter — der erste
+Aufruf kann daher rund eine Minute dauern.
+
 > *Vorlauf* (der): 1. Heizungstechnik — die warme Leitung vom Wärmeerzeuger zu den Heizflächen. 2. übertragen — der Vorsprung, den ein Betrieb hat, der seine Projekte im Griff hat. (Das Projekt hieß bis 08/2026 WPFlow.)
 
 <!-- SCREENSHOT: Pipeline-Dashboard mit Projektliste. Ersetzen durch:
