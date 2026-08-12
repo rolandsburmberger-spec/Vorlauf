@@ -109,6 +109,9 @@ public class DokumentExportTests
         // BR-CO-26: ohne Verkäufer-Kennung (hier BT-31, Schema VA) lehnt der
         // KoSIT-Validator ab — die Steuernummer (BT-32/FC) allein reicht nicht.
         Assert.Matches(@"SpecifiedTaxRegistration[\s\S]*?schemeID=""VA""[^>]*>DE136589744", xml);
+
+        // BT-23 Geschäftsprozess (PEPPOL-EN16931-R001) — ohne ihn: REJECT.
+        Assert.Matches(@"BusinessProcessSpecifiedDocumentContextParameter[\s\S]*?urn:fdc:peppol\.eu:2017:poacc:billing:01:1\.0", xml);
     }
 
     [Fact]

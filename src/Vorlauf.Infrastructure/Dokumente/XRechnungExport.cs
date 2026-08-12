@@ -30,6 +30,10 @@ public sealed class XRechnungExport(Betrieb betrieb)
             rechnung.Datum.ToDateTime(TimeOnly.MinValue),
             CurrencyCodes.EUR);
 
+        // BT-23: Geschäftsprozess, in der XRechnung Pflicht
+        // (PEPPOL-EN16931-R001). Fehlt er, weist der KoSIT-Validator ab.
+        d.BusinessProcess = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0";
+
         // BR-DE-15: Käuferreferenz ist in der XRechnung Pflicht. Für
         // Privatkunden gibt es keine Leitweg-ID — Referenz ist die Projektnummer.
         d.ReferenceOrderNo = ProjektReferenz(projekt);
