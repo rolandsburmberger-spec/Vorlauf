@@ -12,8 +12,19 @@ namespace Vorlauf.Infrastructure.Dokumente;
 /// </summary>
 public sealed class XRechnungExport(Betrieb betrieb)
 {
+    /// <summary>Prüft, ob alle XRechnung-Pflichtangaben am Projekt vorhanden sind.</summary>
+    public static string? FehlendeAngabe(Projekt projekt) =>
+        string.IsNullOrWhiteSpace(projekt.Kunde?.Email)
+            ? "E-Mail-Adresse des Kunden (BT-49 — in der XRechnung Pflicht)"
+            : string.IsNullOrWhiteSpace(projekt.Kunde?.PlzOrt ?? projekt.Gebaeude?.PlzOrt)
+                ? "Anschrift des Kunden (BT-52/BT-53 — in der XRechnung Pflicht)"
+                : null;
+
     public byte[] Erzeuge(Projekt projekt, Rechnung rechnung)
     {
+        if (FehlendeAngabe(projekt) is { } fehlt)
+            throw new XRechnungUnvollstaendigException($"Für die XRechnung fehlt: {fehlt}.");
+
         var d = InvoiceDescriptor.CreateInvoice(
             rechnung.Nummer,
             rechnung.Datum.ToDateTime(TimeOnly.MinValue),
@@ -38,6 +49,9 @@ public sealed class XRechnungExport(Betrieb betrieb)
         else
             d.AddSellerTaxRegistration(betrieb.Steuernummer, TaxRegistrationSchemeID.FC);
 
+        // BT-34: elektronische Adresse des Verkäufers, in der XRechnung Pflicht.
+        d.SetSellerElectronicAddress(betrieb.Email, ElectronicAddressSchemeIdentifiers.ElectronicMailSmtp);
+
         var (plz, ort) = TrennePlzOrt(projekt.Kunde?.PlzOrt ?? projekt.Gebaeude?.PlzOrt);
         d.SetBuyer(
             name: projekt.Kunde?.Name ?? "Unbekannt",
@@ -45,6 +59,9 @@ public sealed class XRechnungExport(Betrieb betrieb)
             city: ort,
             street: projekt.Kunde?.Strasse ?? projekt.Gebaeude?.Strasse ?? "",
             country: CountryCodes.DE);
+
+        // BT-49: elektronische Adresse des Käufers, in der XRechnung Pflicht.
+        d.SetBuyerElectronicAddress(projekt.Kunde!.Email!, ElectronicAddressSchemeIdentifiers.ElectronicMailSmtp);
 
         foreach (var pos in rechnung.Positionen.OrderBy(p => p.Position))
         {
@@ -102,6 +119,9 @@ public sealed class XRechnungExport(Betrieb betrieb)
     /// <summary>Kurze, stabile Projektreferenz für BT-10 (Käuferreferenz).</summary>
     public static string ProjektReferenz(Projekt projekt) =>
         $"VP-{projekt.Id.ToString("N")[..8].ToUpperInvariant()}";
+
+    /// <summary>Am Projekt fehlt eine Pflichtangabe der XRechnung.</summary>
+    public sealed class XRechnungUnvollstaendigException(string nachricht) : InvalidOperationException(nachricht);
 
     private static (string Plz, string Ort) TrennePlzOrt(string? plzOrt)
     {

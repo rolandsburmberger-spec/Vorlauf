@@ -21,7 +21,14 @@
   </div>
   <div class="d-flex gap-2" data-tour="rechnung-downloads">
     <a class="btn btn-primary" asp-page-handler="Pdf" asp-route-id="@Model.Projekt.Id" asp-route-rechnungId="@r.Id">PDF herunterladen</a>
-    <a class="btn btn-outline-primary" asp-page-handler="Xml" asp-route-id="@Model.Projekt.Id" asp-route-rechnungId="@r.Id">XRechnung (XML)</a>
+    @if (Model.XRechnungFehlt is null)
+    {
+      <a class="btn btn-outline-primary" asp-page-handler="Xml" asp-route-id="@Model.Projekt.Id" asp-route-rechnungId="@r.Id">XRechnung (XML)</a>
+    }
+    else
+    {
+      <button class="btn btn-outline-secondary" type="button" disabled title="Es fehlt: @Model.XRechnungFehlt">XRechnung (XML)</button>
+    }
   </div>
 </div>
 

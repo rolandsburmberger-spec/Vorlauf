@@ -34,7 +34,7 @@ public class DokumentExportTests
         {
             Bezeichnung = "WP Musterweg 1, Fulda",
             AngelegtUtc = new DateTime(2026, 5, 4, 8, 0, 0, DateTimeKind.Utc),
-            Kunde = new Kunde { Name = "Familie Muster", Strasse = "Musterweg 1", PlzOrt = "36037 Fulda", Selbstnutzer = true },
+            Kunde = new Kunde { Name = "Familie Muster", Strasse = "Musterweg 1", PlzOrt = "36037 Fulda", Email = "familie.muster@example.com", Selbstnutzer = true },
             Gebaeude = new Gebaeude { Strasse = "Musterweg 1", PlzOrt = "36037 Fulda", Baujahr = 1994, WohnflaecheM2 = 160m },
         };
         projekt.Rechnungen.Add(Rechnung.Abschlag(
@@ -99,6 +99,24 @@ public class DokumentExportTests
         Assert.Contains("11900.00", xml);                 // Vorauszahlung (BT-113)
         Assert.Contains("19992.00", xml);                 // fälliger Betrag (BT-115)
         Assert.Contains(XRechnungExport.ProjektReferenz(projekt), xml); // Käuferreferenz (BT-10)
+
+        // BT-34/BT-49: elektronische Adressen beider Seiten — in der XRechnung Pflicht.
+        // Ihr Fehlen hat die KoSIT-Validierung in der CI zu Fall gebracht.
+        Assert.Contains("info@shk-musterhaus.example", xml);
+        Assert.Matches(@"BuyerTradeParty[\s\S]*?URIUniversalCommunication[\s\S]*?familie\.muster@example\.com", xml);
+    }
+
+    [Fact]
+    public void XRechnung_ohne_KundenEmail_wird_abgelehnt()
+    {
+        var projekt = TestProjekt();
+        projekt.Kunde!.Email = null;
+        var schluss = projekt.Rechnungen.Single(r => r.Typ == RechnungTyp.Schlussrechnung);
+
+        Assert.NotNull(XRechnungExport.FehlendeAngabe(projekt));
+        var ex = Assert.Throws<XRechnungExport.XRechnungUnvollstaendigException>(
+            () => new XRechnungExport(TestBetrieb()).Erzeuge(projekt, schluss));
+        Assert.Contains("BT-49", ex.Message);
     }
 
     [Fact]

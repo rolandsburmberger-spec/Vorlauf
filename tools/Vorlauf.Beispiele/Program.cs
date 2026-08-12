@@ -31,6 +31,7 @@ var projekt = new Projekt
         Name = "Familie Muster",
         Strasse = "Musterweg 1",
         PlzOrt = "36037 Fulda",
+        Email = "familie.muster@example.com",
         Selbstnutzer = true,
     },
     Gebaeude = new Gebaeude { Strasse = "Musterweg 1", PlzOrt = "36037 Fulda", Baujahr = 1994, WohnflaecheM2 = 160m },

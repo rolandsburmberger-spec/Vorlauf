@@ -13,6 +13,9 @@ public class RechnungDetailModel(IProjektStore store, PdfDokumente pdf, XRechnun
     public IReadOnlyList<Rechnung> VerrechneteAbschlaege { get; private set; } = [];
     public decimal Restbetrag { get; private set; }
 
+    /// <summary>Nicht-null, wenn dem Projekt eine XRechnung-Pflichtangabe fehlt.</summary>
+    public string? XRechnungFehlt { get; private set; }
+
     public IActionResult OnGet(Guid id, Guid rechnungId)
     {
         if (Lade(id, rechnungId) is { } fehler) return fehler;
@@ -28,6 +31,8 @@ public class RechnungDetailModel(IProjektStore store, PdfDokumente pdf, XRechnun
     public IActionResult OnGetXml(Guid id, Guid rechnungId)
     {
         if (Lade(id, rechnungId) is { } fehler) return fehler;
+        if (XRechnungFehlt is not null)
+            return BadRequest($"XRechnung nicht möglich — es fehlt: {XRechnungFehlt}.");
         return File(xrechnung.Erzeuge(Projekt, Rechnung), "application/xml", $"{Rechnung.Nummer}-xrechnung.xml");
     }
 
@@ -43,6 +48,7 @@ public class RechnungDetailModel(IProjektStore store, PdfDokumente pdf, XRechnun
             ? projekt.Rechnungen.Where(r => r.Id != rechnung.Id && r.Typ == RechnungTyp.Abschlag).ToList()
             : [];
         Restbetrag = Abschlagsverrechnung.Restbetrag(rechnung, projekt.Rechnungen);
+        XRechnungFehlt = XRechnungExport.FehlendeAngabe(projekt);
         return null;
     }
 }

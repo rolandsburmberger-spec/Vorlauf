@@ -123,13 +123,57 @@ public static class DemoSeed
         store.Speichere(p8);
     }
 
-    private static Projekt Neu(string bezeichnung, string kunde, int baujahr, decimal flaeche) => new()
+    private static Projekt Neu(string bezeichnung, string kunde, int baujahr, decimal flaeche)
     {
-        Bezeichnung = bezeichnung,
-        AngelegtUtc = DateTime.UtcNow,
-        Kunde = new Kunde { Name = kunde, Selbstnutzer = true },
-        Gebaeude = new Gebaeude { Baujahr = baujahr, WohnflaecheM2 = flaeche, Wohneinheiten = 1 },
+        // Anschrift und E-Mail aus der Bezeichnung („WP <Straße>, <Ort>") ableiten:
+        // Die XRechnung verlangt beides vom Käufer (BT-49, BT-52/53).
+        var ohnePraefix = bezeichnung.StartsWith("WP ", StringComparison.Ordinal) ? bezeichnung[3..] : bezeichnung;
+        var teile = ohnePraefix.Split(',', 2, StringSplitOptions.TrimEntries);
+        var strasse = teile[0];
+        var ort = teile.Length > 1 ? teile[1] : "Fulda";
+        var plzOrt = $"{Plz(ort)} {ort}";
+
+        return new Projekt
+        {
+            Bezeichnung = bezeichnung,
+            AngelegtUtc = DateTime.UtcNow,
+            Kunde = new Kunde
+            {
+                Name = kunde,
+                Selbstnutzer = true,
+                Strasse = strasse,
+                PlzOrt = plzOrt,
+                Email = DemoEmail(kunde),
+            },
+            Gebaeude = new Gebaeude
+            {
+                Baujahr = baujahr,
+                WohnflaecheM2 = flaeche,
+                Wohneinheiten = 1,
+                Strasse = strasse,
+                PlzOrt = plzOrt,
+            },
+        };
+    }
+
+    private static string Plz(string ort) => ort switch
+    {
+        "Petersberg" => "36100",
+        "Künzell" => "36093",
+        "Eichenzell" => "36124",
+        "Hünfeld" => "36088",
+        "Großenlüder" => "36137",
+        _ => "36037",
     };
+
+    /// <summary>Fiktive Adresse (example.com ist nach RFC 2606 dafür reserviert).</summary>
+    private static string DemoEmail(string kunde)
+    {
+        var basis = kunde.ToLowerInvariant()
+            .Replace("ä", "ae").Replace("ö", "oe").Replace("ü", "ue").Replace("ß", "ss")
+            .Replace(' ', '.');
+        return new string([.. basis.Where(c => char.IsLetterOrDigit(c) || c == '.')]) + "@example.com";
+    }
 
     private static Aufnahme Aufnahme(AltheizungsTyp typ, int baujahrHeizung, decimal flaeche, int baujahrGebaeude)
     {
