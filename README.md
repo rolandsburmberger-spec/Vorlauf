@@ -111,3 +111,7 @@ Bewusst nicht im Scope: DATANORM, IDS-Connect, GAEB, DATEV, Lohn- und Zeiterfass
 ---
 
 Alle Förderausgaben tragen den Hinweis: *Unverbindliche Orientierung — maßgeblich sind die KfW-Bedingungen am Tag der Antragstellung.*
+
+## Lizenz
+
+Vorlauf ist öffentlich einsehbar, aber **keine Open-Source-Software**. Alle Rechte liegen bei Rolands Burmberger, Burmberger Digital. Nutzung, Kopie, Anpassung oder Weitergabe nur mit schriftlicher Zustimmung. Details in [LICENSE](LICENSE), Anfragen an info@burmberger-digital.de.
